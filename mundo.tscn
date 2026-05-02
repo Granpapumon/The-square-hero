@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://we0qt10xnqc1"]
+
+[ext_resource type="Script" uid="uid://dnapub5a85tvm" path="res://mundo.gd" id="1_fw4w5"]
+[ext_resource type="Texture2D" uid="uid://rmav1krs4edp" path="res://icon.svg" id="1_lgngo"]
+[ext_resource type="PackedScene" uid="uid://brikuh3ecyocs" path="res://menu_nivel.tscn" id="2_aou4a"]
+[ext_resource type="PackedScene" uid="uid://ck6n7sx4uy548" path="res://player.tscn" id="2_fw4w5"]
+[ext_resource type="PackedScene" uid="uid://diumjd1riheh3" path="res://enemigo.tscn" id="4_otwa2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_otwa2"]
+size = Vector2(3129, 133)
+
+[node name="Mundo" type="Node2D" unique_id=2083137370]
+script = ExtResource("1_fw4w5")
+
+[node name="MenuNivel" parent="." unique_id=1878790410 instance=ExtResource("2_aou4a")]
+visible = false
+
+[node name="Player" parent="." unique_id=420681925 instance=ExtResource("2_fw4w5")]
+position = Vector2(0, -1)
+
+[node name="suelo" type="StaticBody2D" parent="." unique_id=2099538738]
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="suelo" unique_id=1555740171]
+position = Vector2(20.499939, 138)
+scale = Vector2(24.47656, 1)
+texture = ExtResource("1_lgngo")
+flip_v = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="suelo" unique_id=1164727480]
+position = Vector2(19.50003, 142)
+shape = SubResource("RectangleShape2D_otwa2")
+
+[node name="Spawner" type="Timer" parent="." unique_id=765154507]
+wait_time = 3.0
+autostart = true
+
+[node name="Enemigo2" parent="." unique_id=140143155 instance=ExtResource("4_otwa2")]
+position = Vector2(1181, -123)
+
+[connection signal="timeout" from="Spawner" to="." method="_on_spawner_timeout"]

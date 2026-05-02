@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://d0cb5mg3hl582"]
+
+[ext_resource type="Script" uid="uid://b8duq2ds1x142" path="res://gema_xp.gd" id="1_a1tci"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_vvpig"]
+size = Vector2(20, 20)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_a1tci"]
+radius = 16.124516
+
+[node name="gema xp" type="Area2D" unique_id=1833563399]
+script = ExtResource("1_a1tci")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=705506276]
+modulate = Color(1, 0.7790548, 0.5609527, 0.9647059)
+texture = SubResource("PlaceholderTexture2D_vvpig")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=856683422]
+shape = SubResource("CircleShape2D_a1tci")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
