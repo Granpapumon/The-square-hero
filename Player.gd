@@ -66,6 +66,13 @@ func _on_weapon_timer_timeout():
 # --- XP Y NIVELES ---
 func ganar_xp(cantidad):
 	xp_actual += cantidad
+	
+	# Buscamos la pantalla (HUD) y le avisamos que la barra debe moverse
+	var hud = get_tree().get_first_node_in_group("HUD")
+	if hud and hud.has_method("actualizar_xp"):
+		hud.actualizar_xp(xp_actual, xp_necesaria)
+		
+	# Si nos pasamos del límite, subimos de nivel
 	if xp_actual >= xp_necesaria:
 		subir_nivel()
 
@@ -73,13 +80,28 @@ func subir_nivel():
 	nivel += 1
 	xp_actual = 0
 	xp_necesaria += 2
-	get_tree().paused = true
+	print("NUEVO NIVEL: ", nivel)
+	
+	# Le avisamos al HUD que cambie el texto y reinicie la barra
+	var hud = get_tree().get_first_node_in_group("HUD")
+	if hud:
+		hud.actualizar_nivel(nivel)
+		hud.actualizar_xp(xp_actual, xp_necesaria)
+	
+	# Mostramos el menú correcto
 	var menu = get_tree().get_first_node_in_group("menu_nivel")
-	if nivel == 5 or nivel == 15:
-		menu.configurar_modo_habilidades()
-	else:
-		menu.configurar_modo_atributos()
-	menu.show()
+	# Si no usas grupo para el menú, cambia la línea de arriba por: var menu = get_parent().get_node("MenuNivel")
+	
+	if menu:
+		if nivel == 5:
+			menu.configurar_modo_habilidades(1)
+		elif nivel == 15:
+			menu.configurar_modo_habilidades(2)
+		else:
+			menu.configurar_modo_atributos()
+		
+		get_tree().paused = true
+		menu.show()
 
 # --- DESBLOQUEAR HABILIDAD ---
 func desbloquear_habilidad(nombre: String):

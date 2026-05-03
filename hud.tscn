@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://gftmepbhlnxu" path="res://hud.gd" id="1_37p78"]
 
-[node name="HUD" type="CanvasLayer" unique_id=1122673190]
+[node name="HUD" type="CanvasLayer" unique_id=1122673190 groups=["HUD"]]
 script = ExtResource("1_37p78")
 
 [node name="BarraXP" type="ProgressBar" parent="." unique_id=776964876]
