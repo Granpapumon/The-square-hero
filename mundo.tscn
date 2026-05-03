@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dnapub5a85tvm" path="res://mundo.gd" id="1_fw4w5"]
 [ext_resource type="Texture2D" uid="uid://rmav1krs4edp" path="res://icon.svg" id="1_lgngo"]
+[ext_resource type="PackedScene" uid="uid://c4fdvndujfkc4" path="res://hud.tscn" id="2_5ckkb"]
 [ext_resource type="PackedScene" uid="uid://brikuh3ecyocs" path="res://menu_nivel.tscn" id="2_aou4a"]
 [ext_resource type="PackedScene" uid="uid://ck6n7sx4uy548" path="res://player.tscn" id="2_fw4w5"]
 [ext_resource type="PackedScene" uid="uid://diumjd1riheh3" path="res://enemigo.tscn" id="4_otwa2"]
@@ -37,5 +38,7 @@ autostart = true
 
 [node name="Enemigo2" parent="." unique_id=140143155 instance=ExtResource("4_otwa2")]
 position = Vector2(1181, -123)
+
+[node name="HUD" parent="." unique_id=1122673190 instance=ExtResource("2_5ckkb")]
 
 [connection signal="timeout" from="Spawner" to="." method="_on_spawner_timeout"]

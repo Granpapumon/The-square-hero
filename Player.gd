@@ -6,7 +6,11 @@ var fuerza_salto = -600.0 # Ahora es variable, no constante
 var dano_ataque = 1
 var tiempo_disparo = 1.0 # Los segundos que tarda en disparar
 var gravedad = 2000.0
-
+@onready var proyectil_fuego_escena = preload("res://proyectil_fuego.tscn")
+var habilidad_1 = "" # Guardará "fuego", "hielo", etc.
+var nivel_habilidad_1 = 0
+var habilidad_2 = ""
+var nivel_habilidad_2 = 0
 # Obtenemos la gravedad definida en la configuración global del proyecto.
 #var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 @onready var proyectil_escena = preload("res://proyectil.tscn")
@@ -86,6 +90,12 @@ func ganar_xp(cantidad):
 	xp_actual += cantidad
 	print("XP RECOGIDA: ", xp_actual, " / ", xp_necesaria)
 	
+	# --- NUEVO: Le avisamos al HUD ---
+	var hud = get_parent().get_node("HUD")
+	if hud:
+		hud.actualizar_xp(xp_actual, xp_necesaria)
+	# ---------------------------------
+	
 	if xp_actual >= xp_necesaria:
 		subir_nivel()
 
@@ -93,15 +103,21 @@ func subir_nivel():
 	nivel += 1
 	xp_actual = 0
 	xp_necesaria += 2
-	print("¡EL CUADRADO HA SUBIDO AL NIVEL ", nivel, "!")
 	
-	# 1. Pausamos TODO el juego
+	var menu = get_parent().get_node("MenuNivel")
+	
+	# Lógica según tu tabla de progresión
+	if nivel == 5:
+		menu.configurar_modo_habilidades(1) # Modo elegir Habilidad 1
+	elif nivel == 15:
+		menu.configurar_modo_habilidades(2) # Modo elegir Habilidad 2
+	elif nivel == 25:
+		menu.mostrar_menu_fusion()
+	else:
+		menu.configurar_modo_atributos() # El modo normal que ya tienes
+	
 	get_tree().paused = true
-	
-	# 2. Buscamos el menú en la escena Mundo y le decimos que se muestre
-	get_tree().get_first_node_in_group("menu_nivel").show()
-
-# --- FUNCIONES DE SUBIDA DE NIVEL ---
+	menu.show()
 
 func mejorar_velocidad():
 	velocidad_actual += 50.0
@@ -126,3 +142,38 @@ func mejorar_cadencia():
 	$WeaponTimer.wait_time = tiempo_disparo
 	
 	print("¡Nueva cadencia: dispara cada ", tiempo_disparo, " segundos!")
+func _ready():
+	var hud = get_parent().get_node("HUD")
+	if hud:
+		hud.actualizar_nivel(nivel)
+		hud.actualizar_xp(xp_actual, xp_necesaria)
+
+
+func _on_timer_fuego_timeout():
+	var enemigos = $RangoAtaque.get_overlapping_areas()
+	
+	if enemigos.size() > 0:
+		# Buscamos al enemigo más cercano
+		var objetivo_cercano = enemigos[0]
+		for enemigo in enemigos:
+			var dist_actual = global_position.distance_to(enemigo.global_position)
+			var dist_menor = global_position.distance_to(objetivo_cercano.global_position)
+			if dist_actual < dist_menor:
+				objetivo_cercano = enemigo
+		
+		# Instanciamos la BOLA DE FUEGO
+		var bola_fuego = proyectil_fuego_escena.instantiate()
+		get_tree().current_scene.add_child(bola_fuego)
+		bola_fuego.global_position = global_position
+		
+		var direccion = global_position.direction_to(objetivo_cercano.global_position)
+		bola_fuego.lanzar(direccion)
+
+func desbloquear_fuego():
+	if $TimerFuego.is_stopped():
+		$TimerFuego.start()
+		print("¡FUEGO DESBLOQUEADO!")
+	else:
+		# Si ya lo tiene, lo hacemos un poco más rápido
+		$TimerFuego.wait_time -= 0.2
+		print("¡Fuego nivel subido!")

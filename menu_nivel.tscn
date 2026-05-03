@@ -34,6 +34,18 @@ text = "VELOCIDAD"
 layout_mode = 2
 text = "VELOCIDAD DE ATAQUE"
 
+[node name="FUEGO" type="Button" parent="ColorRect/VBoxContainer" unique_id=1475892656]
+layout_mode = 2
+
+[node name="HIELO" type="Button" parent="ColorRect/VBoxContainer" unique_id=1688684152]
+layout_mode = 2
+
+[node name="RAYO" type="Button" parent="ColorRect/VBoxContainer" unique_id=846623878]
+layout_mode = 2
+
+[node name="VENENO" type="Button" parent="ColorRect/VBoxContainer" unique_id=1380498023]
+layout_mode = 2
+
 [connection signal="pressed" from="ColorRect/VBoxContainer/ATAQUE" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="ColorRect/VBoxContainer/ATAQUE" to="." method="_on_boton_ataque_pressed"]
 [connection signal="pressed" from="ColorRect/VBoxContainer/SALTO" to="." method="_on_button_pressed"]
@@ -41,3 +53,7 @@ text = "VELOCIDAD DE ATAQUE"
 [connection signal="pressed" from="ColorRect/VBoxContainer/VELOCIDAD" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="ColorRect/VBoxContainer/VELOCIDAD" to="." method="_on_boton_velocidad_pressed"]
 [connection signal="pressed" from="ColorRect/VBoxContainer/VELOCIDAD ATAQUE" to="." method="_on_boton_cadencia_pressed"]
+[connection signal="pressed" from="ColorRect/VBoxContainer/FUEGO" to="." method="_on_boton_fuego_pressed"]
+[connection signal="pressed" from="ColorRect/VBoxContainer/HIELO" to="." method="_on_boton_hielo_pressed"]
+[connection signal="pressed" from="ColorRect/VBoxContainer/RAYO" to="." method="_on_boton_rayo_pressed"]
+[connection signal="pressed" from="ColorRect/VBoxContainer/VENENO" to="." method="_on_boton_veneno_pressed"]

@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://c4fdvndujfkc4"]
+
+[ext_resource type="Script" uid="uid://gftmepbhlnxu" path="res://hud.gd" id="1_37p78"]
+
+[node name="HUD" type="CanvasLayer" unique_id=1122673190]
+script = ExtResource("1_37p78")
+
+[node name="BarraXP" type="ProgressBar" parent="." unique_id=776964876]
+offset_left = 17.0
+offset_top = 26.0
+offset_right = 289.0
+offset_bottom = 58.0
+
+[node name="TextoNivel" type="Label" parent="." unique_id=929837706]
+offset_left = 17.0
+offset_top = 26.0
+offset_right = 289.0
+offset_bottom = 60.0
+text = "Nivel: 0"

@@ -55,4 +55,7 @@ collision_mask = 0
 position = Vector2(-0.5, 0)
 shape = SubResource("RectangleShape2D_onrkg")
 
+[node name="TimerFuego" type="Timer" parent="." unique_id=599513240]
+
 [connection signal="timeout" from="WeaponTimer" to="." method="_on_weapon_timer_timeout"]
+[connection signal="timeout" from="TimerFuego" to="." method="_on_timer_fuego_timeout"]

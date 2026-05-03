@@ -1,9 +1,8 @@
 extends Area2D
 
 var velocidad = 600
-var dano = 1
+var dano = 2
 var direccion_vector = Vector2.ZERO # Cambiamos el número por un vector
-
 
 # Esta función la llama el jugador al crear la bala
 func lanzar(dir):
