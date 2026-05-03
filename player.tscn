@@ -57,5 +57,14 @@ shape = SubResource("RectangleShape2D_onrkg")
 
 [node name="TimerFuego" type="Timer" parent="." unique_id=599513240]
 
+[node name="TimerHielo" type="Timer" parent="." unique_id=2090596343]
+
+[node name="TimerRayo" type="Timer" parent="." unique_id=2034267036]
+
+[node name="TimerVeneno" type="Timer" parent="." unique_id=69445698]
+
 [connection signal="timeout" from="WeaponTimer" to="." method="_on_weapon_timer_timeout"]
 [connection signal="timeout" from="TimerFuego" to="." method="_on_timer_fuego_timeout"]
+[connection signal="timeout" from="TimerHielo" to="." method="_on_timer_hielo_timeout"]
+[connection signal="timeout" from="TimerRayo" to="." method="_on_timer_rayo_timeout"]
+[connection signal="timeout" from="TimerVeneno" to="." method="_on_timer_veneno_timeout"]

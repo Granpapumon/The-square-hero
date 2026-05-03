@@ -7,6 +7,9 @@ var dano_ataque = 1
 var tiempo_disparo = 1.0 # Los segundos que tarda en disparar
 var gravedad = 2000.0
 @onready var proyectil_fuego_escena = preload("res://proyectil_fuego.tscn")
+@onready var proyectil_hielo_escena = preload("res://proyectil_hielo.tscn")
+@onready var proyectil_rayo_escena = preload("res://proyectil_rayo.tscn")
+@onready var proyectil_veneno_escena = preload("res://proyectil_veneno.tscn")
 var habilidad_1 = "" # Guardará "fuego", "hielo", etc.
 var nivel_habilidad_1 = 0
 var habilidad_2 = ""
@@ -103,18 +106,25 @@ func subir_nivel():
 	nivel += 1
 	xp_actual = 0
 	xp_necesaria += 2
+	print("NUEVO NIVEL: ", nivel)
 	
+	# 1. ACTUALIZAMOS EL HUD (Lo que faltaba)
+	var hud = get_parent().get_node("HUD")
+	if hud:
+		hud.actualizar_nivel(nivel)
+		hud.actualizar_xp(xp_actual, xp_necesaria)
+	
+	# 2. LOGICA DEL MENU INTELIGENTE
 	var menu = get_parent().get_node("MenuNivel")
 	
-	# Lógica según tu tabla de progresión
 	if nivel == 5:
-		menu.configurar_modo_habilidades(1) # Modo elegir Habilidad 1
+		menu.configurar_modo_habilidades(1)
 	elif nivel == 15:
-		menu.configurar_modo_habilidades(2) # Modo elegir Habilidad 2
+		menu.configurar_modo_habilidades(2)
 	elif nivel == 25:
-		menu.mostrar_menu_fusion()
+		pass # Aquí irá el menú de fusión después
 	else:
-		menu.configurar_modo_atributos() # El modo normal que ya tienes
+		menu.configurar_modo_atributos()
 	
 	get_tree().paused = true
 	menu.show()
@@ -169,11 +179,59 @@ func _on_timer_fuego_timeout():
 		var direccion = global_position.direction_to(objetivo_cercano.global_position)
 		bola_fuego.lanzar(direccion)
 
+func _on_timer_hielo_timeout():
+	var enemigos = $RangoAtaque.get_overlapping_areas()
+	if enemigos.size() > 0:
+		# Buscamos al enemigo más cercano
+		var objetivo_cercano = enemigos[0]
+		for enemigo in enemigos:
+			if global_position.distance_to(enemigo.global_position) < global_position.distance_to(objetivo_cercano.global_position):
+				objetivo_cercano = enemigo
+				
+		# Instanciamos el HIELO
+		var estalactita = proyectil_hielo_escena.instantiate()
+		get_tree().current_scene.add_child(estalactita)
+		estalactita.global_position = global_position
+		
+		# Lo lanzamos hacia el objetivo
+		var direccion = global_position.direction_to(objetivo_cercano.global_position)
+		estalactita.lanzar(direccion)
+
 func desbloquear_fuego():
 	if $TimerFuego.is_stopped():
 		$TimerFuego.start()
-		print("¡FUEGO DESBLOQUEADO!")
-	else:
-		# Si ya lo tiene, lo hacemos un poco más rápido
-		$TimerFuego.wait_time -= 0.2
-		print("¡Fuego nivel subido!")
+		print("¡FUEGO INICIADO A 1 SEGUNDO!")
+
+func desbloquear_hielo():
+	if $TimerHielo.is_stopped():
+		$TimerHielo.start()
+		print("¡HIELO INICIADO A 1 SEGUNDO!")
+		
+func desbloquear_rayo():
+	if $TimerRayo.is_stopped():
+		$TimerRayo.start()
+
+func desbloquear_veneno():
+	if $TimerVeneno.is_stopped():
+		$TimerVeneno.start()
+
+# Funciones de Disparo (Copia la lógica de buscar enemigo del Fuego/Hielo):
+func _on_timer_rayo_timeout():
+	var enemigos = $RangoAtaque.get_overlapping_areas()
+	if enemigos.size() > 0:
+		var objetivo_cercano = enemigos[0]
+		# ... (Tu código para buscar al más cercano) ...
+		var rayo = proyectil_rayo_escena.instantiate()
+		get_tree().current_scene.add_child(rayo)
+		rayo.global_position = global_position
+		rayo.lanzar(global_position.direction_to(objetivo_cercano.global_position))
+
+func _on_timer_veneno_timeout():
+	var enemigos = $RangoAtaque.get_overlapping_areas()
+	if enemigos.size() > 0:
+		var objetivo_cercano = enemigos[0]
+		# ... (Tu código para buscar al más cercano) ...
+		var gota_veneno = proyectil_veneno_escena.instantiate()
+		get_tree().current_scene.add_child(gota_veneno)
+		gota_veneno.global_position = global_position
+		gota_veneno.lanzar(global_position.direction_to(objetivo_cercano.global_position))

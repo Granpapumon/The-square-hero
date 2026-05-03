@@ -2,7 +2,10 @@ extends CharacterBody2D
 
 var velocidad = 100.0
 var salud = 3
+var congelado = false
 var dano_contacto = 10
+@onready var velocidad_base = velocidad
+var envenenado = false
 # Obtenemos la gravedad del proyecto
 var gravedad = ProjectSettings.get_setting("physics/2d/default_gravity")
 
@@ -16,6 +19,12 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 
 func _physics_process(delta):
+	# --- NUEVO: Si está congelado, cortamos la función aquí y no se mueve ---
+	if congelado:
+		return
+	# -------------------------------------------------------------------------
+	
+	# ... (Aquí debajo sigue tu código normal donde el enemigo persigue al jugador)
 	# 1. Aplicar gravedad para que no floten
 	if not is_on_floor():
 		velocity.y += gravedad * delta
@@ -67,3 +76,51 @@ func _on_hitbox_area_entered(area: Area2D) -> void:
 		if area.get_parent().has_method("recibir_daño"):
 			area.get_parent().recibir_daño(dano_contacto) # 10 es la cantidad de daño
 # En enemigo.gd
+func congelar(tiempo: float):
+	# Si ya está congelado, no hacemos nada para que no se buguee
+	if congelado:
+		return
+		
+	congelado = true
+	# Cambiamos su color a azul hielo (Cyan) para que el jugador lo note
+	$Sprite2D.modulate = Color(0, 1, 1) 
+	
+	# Creamos un reloj invisible que espera los segundos que dicta la habilidad
+	await get_tree().create_timer(tiempo).timeout
+	
+	# Cuando el tiempo termina, lo descongelamos y vuelve a su color normal (Blanco/Rojo)
+	congelado = false
+	$Sprite2D.modulate = Color(1, 1, 1)
+
+func ralentizar(porcentaje: float, tiempo: float):
+	if congelado: 
+		return # Si está congelado, no hacemos nada
+		
+	$Sprite2D.modulate = Color(1, 1, 0) # Se pinta de Amarillo
+	velocidad = velocidad_base * (1.0 - porcentaje) # Le quitamos el 60%
+	
+	await get_tree().create_timer(tiempo).timeout
+	
+	velocidad = velocidad_base # Recupera su velocidad
+	if not congelado and not envenenado:
+		$Sprite2D.modulate = Color(1, 1, 1) # Vuelve a la normalidad
+		
+func envenenar(dano_por_tick: int):
+	if envenenado: 
+		return
+		
+	envenenado = true
+	$Sprite2D.modulate = Color(0, 1, 0) # Se pinta de Verde
+	
+	# Hacemos que sufra daño 3 veces (3 segundos)
+	for i in range(3):
+		await get_tree().create_timer(1.0).timeout
+		# Si el enemigo ya murió por nuestros disparos, cancelamos el veneno para no crashear
+		if not is_inside_tree():
+			return 
+		if has_method("recibir_daño"): # Asegúrate de que esta función se llame igual que tu función de daño
+			recibir_daño(dano_por_tick)
+			
+	envenenado = false
+	if not congelado:
+		$Sprite2D.modulate = Color(1, 1, 1)

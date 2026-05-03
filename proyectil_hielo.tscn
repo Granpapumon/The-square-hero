@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://dv58c568ubrfj"]
+
+[ext_resource type="Script" uid="uid://1kmf524yms0y" path="res://proyectil_hielo.gd" id="1_k2msm"]
+[ext_resource type="Texture2D" uid="uid://rmav1krs4edp" path="res://icon.svg" id="2_4d374"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_etydj"]
+size = Vector2(54, 13)
+
+[node name="ProyectilHielo" type="Area2D" unique_id=198901908]
+collision_mask = 2
+script = ExtResource("1_k2msm")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1908298996]
+modulate = Color(1, 0, 0, 1)
+scale = Vector2(0.4, 0.1)
+texture = ExtResource("2_4d374")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288831420]
+position = Vector2(0, 0.5)
+shape = SubResource("RectangleShape2D_etydj")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

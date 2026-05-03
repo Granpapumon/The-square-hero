@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://ddch6utyis6he"]
+
+[ext_resource type="Script" uid="uid://c3u3bgr6q3d4e" path="res://proyectil_veneno.gd" id="1_0tgll"]
+[ext_resource type="Texture2D" uid="uid://rmav1krs4edp" path="res://icon.svg" id="2_lomxy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_etydj"]
+size = Vector2(54, 13)
+
+[node name="ProyectilVeneno" type="Area2D" unique_id=198901908]
+modulate = Color(0.1882353, 1, 0.11372549, 1)
+collision_mask = 2
+script = ExtResource("1_0tgll")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1908298996]
+modulate = Color(1, 0, 0, 1)
+scale = Vector2(0.4, 0.1)
+texture = ExtResource("2_lomxy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288831420]
+position = Vector2(0, 0.5)
+shape = SubResource("RectangleShape2D_etydj")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
