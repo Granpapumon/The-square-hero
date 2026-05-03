@@ -21,6 +21,7 @@ var nivel_habilidad_2 = 0
 
 @onready var proyectil_escena = preload("res://proyectil.tscn")
 
+# --- VIDA ---
 func recibir_daño(cantidad):
 	salud -= cantidad
 	if salud <= 0:
@@ -29,6 +30,7 @@ func recibir_daño(cantidad):
 func morir():
 	get_tree().reload_current_scene()
 
+# --- MOVIMIENTO ---
 func _physics_process(delta):
 	if not is_on_floor():
 		velocity.y += gravedad * delta
@@ -44,6 +46,7 @@ func _physics_process(delta):
 
 	move_and_slide()
 
+# --- DISPARO BASE ---
 func _on_weapon_timer_timeout():
 	var enemigos = $RangoAtaque.get_overlapping_areas()
 	if enemigos.size() == 0:
@@ -60,6 +63,7 @@ func _on_weapon_timer_timeout():
 	bala.global_position = global_position
 	bala.lanzar(global_position.direction_to(objetivo_cercano.global_position))
 
+# --- XP Y NIVELES ---
 func ganar_xp(cantidad):
 	xp_actual += cantidad
 	if xp_actual >= xp_necesaria:
@@ -70,8 +74,14 @@ func subir_nivel():
 	xp_actual = 0
 	xp_necesaria += 2
 	get_tree().paused = true
-	get_tree().get_first_node_in_group("menu_nivel").show()
+	var menu = get_tree().get_first_node_in_group("menu_nivel")
+	if nivel == 5 or nivel == 15:
+		menu.configurar_modo_habilidades()
+	else:
+		menu.configurar_modo_atributos()
+	menu.show()
 
+# --- DESBLOQUEAR HABILIDAD ---
 func desbloquear_habilidad(nombre: String):
 	if habilidad_1 == "":
 		habilidad_1 = nombre
