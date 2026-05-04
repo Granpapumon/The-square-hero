@@ -12,6 +12,7 @@ size = Vector2(733, 454)
 size = Vector2(734, 452)
 
 [node name="Enemigo" type="CharacterBody2D" unique_id=2006028527 groups=["enemigos"]]
+collision_mask = 3
 script = ExtResource("1_alw1r")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2045548079]

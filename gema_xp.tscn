@@ -8,7 +8,12 @@ size = Vector2(20, 20)
 [sub_resource type="CircleShape2D" id="CircleShape2D_a1tci"]
 radius = 16.124516
 
-[node name="gema xp" type="Area2D" unique_id=1833563399]
+[sub_resource type="CircleShape2D" id="CircleShape2D_kjmsg"]
+radius = 16.0
+
+[node name="gema xp" type="RigidBody2D" unique_id=826017374]
+collision_layer = 8
+collision_mask = 2
 script = ExtResource("1_a1tci")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=705506276]
@@ -18,4 +23,11 @@ texture = SubResource("PlaceholderTexture2D_vvpig")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=856683422]
 shape = SubResource("CircleShape2D_a1tci")
 
+[node name="PickupArea" type="Area2D" parent="." unique_id=1627310032]
+collision_layer = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PickupArea" unique_id=1215932453]
+shape = SubResource("CircleShape2D_kjmsg")
+
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_entered" from="PickupArea" to="." method="_on_pickup_area_body_entered"]

@@ -12,6 +12,7 @@ size = Vector2(128, 240)
 size = Vector2(130.5, 240)
 
 [node name="Enemigo" type="CharacterBody2D" unique_id=2006028527 groups=["enemigos"]]
+collision_mask = 3
 script = ExtResource("1_q14dq")
 salud = 8
 probabilidad_gema = 0.95

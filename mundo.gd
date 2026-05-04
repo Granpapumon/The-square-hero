@@ -46,5 +46,5 @@ func _on_spawner_timeout() -> void:
 		if abs(x_al_azar - player.global_position.x) > radio_seguro:
 			posicion_valida = true
 
-	nuevo_enemigo.global_position = Vector2(x_al_azar, 130)
+	nuevo_enemigo.global_position = Vector2(x_al_azar, 100)
 	add_child(nuevo_enemigo)

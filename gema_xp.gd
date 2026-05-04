@@ -1,10 +1,15 @@
-extends Area2D
+extends RigidBody2D
 
-var valor_xp = 1 # Según TSH.xlsx para Fase 1
+var valor_xp = 1
 
-func _on_body_entered(body: Node2D) -> void:
+func _ready():
+	linear_velocity = Vector2(randf_range(-80, 80), -300)
+	physics_material_override = PhysicsMaterial.new()
+	physics_material_override.bounce = 0.4
+	physics_material_override.friction = 1.0
+
+func _on_pickup_area_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
-		# Verificamos que el player tenga la función antes de llamarla
 		if body.has_method("ganar_xp"):
 			body.ganar_xp(valor_xp)
-		queue_free() # La gema desaparece
+		queue_free()
