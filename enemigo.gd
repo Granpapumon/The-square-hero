@@ -1,10 +1,10 @@
 extends CharacterBody2D
 
 # --- ESTADÍSTICAS ---
-var velocidad = 100.0
-var velocidad_base = 100.0
-@export var salud = 6
-@export var dano_contacto = 10 # Cuánta vida te quita al tocarte
+@export var velocidad = 100.0
+var velocidad_base: float
+@export var salud = 3
+@export var dano_contacto = 10
 
 # --- ESTADOS ---
 var congelado = false

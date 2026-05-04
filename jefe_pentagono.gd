@@ -1,57 +1,49 @@
 extends CharacterBody2D
 
-# --- ESTADÍSTICAS DEL JEFE ---
 @export var salud = 500
 @export var velocidad = 100.0
-@export var dano_contacto = 30 # ¡Es un jefe, pega fuerte!
+@export var dano_contacto = 30
 
+var gravedad = ProjectSettings.get_setting("physics/2d/default_gravity")
 var player = null
-var saltando = false # Estado para saber si está en el aire
+var saltando = false
 
 func _ready():
 	player = get_tree().get_first_node_in_group("player")
 
-func _physics_process(_delta):
-	# Solo persigue al jugador si NO está a la mitad de un salto
+func _physics_process(delta):
+	if not is_on_floor():
+		velocity.y += gravedad * delta
 	if is_instance_valid(player) and not saltando:
 		var direccion = global_position.direction_to(player.global_position)
-		velocity = direccion * velocidad
-		move_and_slide()
+		velocity.x = velocidad if direccion.x > 0 else -velocidad
+	else:
+		velocity.x = move_toward(velocity.x, 0, velocidad)
+	move_and_slide()
 
-# --- DAÑO Y HABILIDAD DE ESQUIVAR ---
 func recibir_daño(cantidad):
-	# HABILIDAD: 30% de probabilidad de esquivar el ataque
 	if randf() <= 0.30:
-		print("¡El Jefe esquivó el ataque!")
-		$Sprite2D.modulate = Color(1, 1, 1, 0.5) # Se hace un poco transparente para que notes el esquive
+		$Sprite2D.modulate = Color(1, 1, 1, 0.5)
 		await get_tree().create_timer(0.2).timeout
-		$Sprite2D.modulate = Color(1, 1, 1, 1) # Vuelve a la normalidad
-		return # ¡Cancelamos el daño y salimos de la función!
-		
-	# Si no esquivó, recibe el daño normal
+		if not is_inside_tree():
+			return
+		$Sprite2D.modulate = Color(1, 1, 1, 1)
+		return
 	salud -= cantidad
-	
-	# Muerte del Jefe
 	if salud <= 0:
-		print("¡JEFE PENTÁGONO DERROTADO!")
 		queue_free()
 
-# --- HABILIDAD: SALTO AL AZAR ---
 func _on_timer_salto_timeout():
 	saltando = true
-	
-	# Elige una dirección completamente al azar
 	var direccion_azar = Vector2(randf_range(-1, 1), randf_range(-1, 1)).normalized()
-	
-	# Da un impulso muy rápido (4 veces su velocidad normal)
 	velocity = direccion_azar * (velocidad * 4)
 	move_and_slide()
-	
-	# Se queda quieto un instante después de saltar antes de volver a perseguirte
 	await get_tree().create_timer(0.4).timeout
+	if not is_inside_tree():
+		return
 	saltando = false
-# --- DAÑO AL JUGADOR ---
+
 func _on_hitbox_area_entered(area):
-	# Si lo que tocamos tiene la función de recibir daño (el jugador), lo atacamos
-	if area.get_parent().has_method("recibir_daño"):
-		area.get_parent().recibir_daño(dano_contacto)
+	if area.name == "Hurtbox":
+		if area.get_parent().has_method("recibir_daño"):
+			area.get_parent().recibir_daño(dano_contacto)
