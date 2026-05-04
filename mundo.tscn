@@ -6,11 +6,12 @@
 [ext_resource type="PackedScene" uid="uid://brikuh3ecyocs" path="res://menu_nivel.tscn" id="2_aou4a"]
 [ext_resource type="PackedScene" uid="uid://ck6n7sx4uy548" path="res://player.tscn" id="2_fw4w5"]
 [ext_resource type="PackedScene" uid="uid://diumjd1riheh3" path="res://enemigo.tscn" id="4_otwa2"]
+[ext_resource type="PackedScene" uid="uid://cld022tfitfbs" path="res://pantalla_perks.tscn" id="7_2hh7m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_otwa2"]
 size = Vector2(3129, 133)
 
-[node name="Mundo" type="Node2D" unique_id=2083137370]
+[node name="Mundo" type="Node2D" unique_id=2083137370 groups=["mundo"]]
 script = ExtResource("1_fw4w5")
 
 [node name="MenuNivel" parent="." unique_id=1878790410 instance=ExtResource("2_aou4a")]
@@ -41,5 +42,11 @@ autostart = true
 position = Vector2(1181, -123)
 
 [node name="HUD" parent="." unique_id=1122673190 instance=ExtResource("2_5ckkb")]
+
+[node name="Label" type="Label" parent="." unique_id=845827045]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="CanvasLayer" parent="." unique_id=528968382 instance=ExtResource("7_2hh7m")]
 
 [connection signal="timeout" from="Spawner" to="." method="_on_spawner_timeout"]

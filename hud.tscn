@@ -17,3 +17,11 @@ offset_top = 26.0
 offset_right = 289.0
 offset_bottom = 60.0
 text = "Nivel: 0"
+
+[node name="MensajeHabilidad" type="Label" parent="." unique_id=384173401]
+offset_left = 570.0
+offset_top = 144.0
+offset_right = 751.0
+offset_bottom = 167.0
+theme_override_font_sizes/font_size = 30
+text = "Subio de nivel!!!"

@@ -36,7 +36,7 @@ shape = SubResource("RectangleShape2D_moxti")
 
 [node name="TimerSalto" type="Timer" parent="." unique_id=157609365]
 
-[node name="Polygon2D" type="Polygon2D" parent="." unique_id=1364152034]
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=1364152034 groups=["jefe"]]
 position = Vector2(405.80548, -138.06721)
 scale = Vector2(1.2621628, 1.2772157)
 color = Color(0.3647059, 1, 1, 1)
