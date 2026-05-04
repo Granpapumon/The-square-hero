@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://bw5owjdcqwssk"]
+
+[ext_resource type="Script" uid="uid://b07a4aydpeaw7" path="res://enemigo.gd" id="1_q14dq"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_becj5"]
+size = Vector2(133, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a5tj2"]
+size = Vector2(128, 240)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_moxti"]
+size = Vector2(130.5, 240)
+
+[node name="Enemigo" type="CharacterBody2D" unique_id=2006028527 groups=["enemigos"]]
+script = ExtResource("1_q14dq")
+salud = 8
+probabilidad_gema = 0.95
+xp_que_da = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2045548079]
+position = Vector2(3.5, 0.5)
+shape = SubResource("RectangleShape2D_becj5")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1866639594]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1139484791]
+position = Vector2(2, 0.5)
+shape = SubResource("RectangleShape2D_a5tj2")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=346535749 groups=["enemigos"]]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1160862772]
+position = Vector2(2.75, 1)
+shape = SubResource("RectangleShape2D_moxti")
+
+[node name="Polygon2D" type="Polygon2D" parent="." unique_id=186776185]
+position = Vector2(33, 8.489621)
+scale = Vector2(1.0336134, 1.6391093)
+polygon = PackedVector2Array(-89, -79, 30, -78, 23.554321, 0.64505005, 31, 69, -87, 70, -88.00922, -5.1881714)
+uv = PackedVector2Array(-91, -64, 25, -62, 22, 68, -94, 62)
+polygons = [PackedInt32Array(0, 1, 3, 4)]
+
+[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

@@ -3,8 +3,8 @@ extends CharacterBody2D
 # --- ESTADÍSTICAS ---
 var velocidad = 100.0
 var velocidad_base = 100.0
-var salud = 3
-var dano_contacto = 10
+@export var salud = 6
+@export var dano_contacto = 10 # Cuánta vida te quita al tocarte
 
 # --- ESTADOS ---
 var congelado = false
@@ -14,6 +14,8 @@ var gravedad = ProjectSettings.get_setting("physics/2d/default_gravity")
 var player = null
 
 @onready var gema_escena = preload("res://gema_xp.tscn")
+@export var probabilidad_gema: float = 1.0 # 1.0 es 100%, 0.75 es 75%, etc.
+@export var xp_que_da: int = 1
 
 func _ready():
 	player = get_tree().get_first_node_in_group("player")
@@ -37,16 +39,24 @@ func _physics_process(delta):
 # --- DAÑO Y MUERTE ---
 func recibir_daño(cantidad):
 	salud -= cantidad
+	
+	# Si la vida llega a cero, el enemigo muere
 	if salud <= 0:
-		var gema = gema_escena.instantiate()
-		get_parent().call_deferred("add_child", gema)
-		gema.global_position = global_position + Vector2(0, 20)
-		queue_free()
+		
+		# --- SISTEMA DE DROPEO (BOTÍN) ---
+		if randf() <= probabilidad_gema:
+			var gema = gema_escena.instantiate()
+			gema.valor_xp = xp_que_da
+			gema.global_position = global_position # <--- ¡PRIMERO le damos la posición!
+			get_parent().call_deferred("add_child", gema) # <--- ¡DESPUÉS la añadimos al mundo!
+			
+		queue_free() # El enemigo desaparece
 
-func _on_hitbox_area_entered(area: Area2D) -> void:
-	if area.name == "Hurtbox":
-		if area.get_parent().has_method("recibir_daño"):
-			area.get_parent().recibir_daño(dano_contacto)
+func _on_hitbox_area_entered(area):
+	# Verificamos que lo que tocamos sea el jugador (si tiene la función recibir_daño)
+	if area.get_parent().has_method("recibir_daño"):
+		# Le inyectamos nuestro daño de contacto
+		area.get_parent().recibir_daño(dano_contacto)
 
 # --- EFECTOS DE HABILIDADES ---
 func congelar(tiempo: float):

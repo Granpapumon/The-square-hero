@@ -7,6 +7,7 @@
 size = Vector2(54, 13)
 
 [node name="ProyectilHielo" type="Area2D" unique_id=198901908]
+modulate = Color(0, 1, 1, 1)
 collision_mask = 2
 script = ExtResource("1_k2msm")
 
