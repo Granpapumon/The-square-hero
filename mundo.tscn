@@ -14,6 +14,8 @@ size = Vector2(3129, 133)
 [node name="Mundo" type="Node2D" unique_id=2083137370 groups=["mundo"]]
 script = ExtResource("1_fw4w5")
 
+[node name="CanvasLayer" parent="." unique_id=528968382 groups=["mundo"] instance=ExtResource("7_2hh7m")]
+
 [node name="MenuNivel" parent="." unique_id=1878790410 instance=ExtResource("2_aou4a")]
 visible = false
 
@@ -46,7 +48,5 @@ position = Vector2(1181, -123)
 [node name="Label" type="Label" parent="." unique_id=845827045]
 offset_right = 40.0
 offset_bottom = 23.0
-
-[node name="CanvasLayer" parent="." unique_id=528968382 instance=ExtResource("7_2hh7m")]
 
 [connection signal="timeout" from="Spawner" to="." method="_on_spawner_timeout"]

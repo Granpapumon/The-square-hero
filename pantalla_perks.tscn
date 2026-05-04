@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" uid="uid://4kic422m7soq" path="res://pantalla_perks.gd" id="1_xyy51"]
 
-[node name="CanvasLayer" type="CanvasLayer" unique_id=528968382]
+[node name="PantallaPerks" type="CanvasLayer" unique_id=528968382]
+process_mode = 3
 script = ExtResource("1_xyy51")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1199570982]
@@ -46,7 +47,7 @@ offset_bottom = 569.0
 theme_override_font_sizes/font_size = 45
 text = "RANGO"
 
-[connection signal="pressed" from="ColorRect/DASH" to="." method="_on_dash_pressed"]
-[connection signal="pressed" from="ColorRect/SALTO DOBLE" to="." method="_on_salto_doble_pressed"]
-[connection signal="pressed" from="ColorRect/VIDA DOBLE" to="." method="_on_vida_doble_pressed"]
-[connection signal="pressed" from="ColorRect/RANGO" to="." method="_on_rango_pressed"]
+[connection signal="pressed" from="ColorRect/DASH" to="." method="_on_boton_dash_pressed"]
+[connection signal="pressed" from="ColorRect/SALTO DOBLE" to="." method="_on_boton_salto_doble_pressed"]
+[connection signal="pressed" from="ColorRect/VIDA DOBLE" to="." method="_on_boton_vida_doble_pressed"]
+[connection signal="pressed" from="ColorRect/RANGO" to="." method="_on_boton_rango_pressed"]
