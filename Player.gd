@@ -61,7 +61,7 @@ func _on_weapon_timer_timeout():
 # --- XP Y NIVELES ---
 func ganar_xp(cantidad):
 	xp_actual += cantidad
-	var hud = get_tree().get_first_node_in_group("hud")
+	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.actualizar_xp(xp_actual, xp_necesaria)
 	if xp_actual >= xp_necesaria:
@@ -71,7 +71,7 @@ func subir_nivel():
 	nivel += 1
 	xp_actual = 0
 	xp_necesaria += 2
-	var hud = get_tree().get_first_node_in_group("hud")
+	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.actualizar_xp(0, xp_necesaria)
 		hud.actualizar_nivel(nivel)
