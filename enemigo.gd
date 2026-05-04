@@ -37,20 +37,20 @@ func _physics_process(delta):
 	move_and_slide()
 
 # --- DAÑO Y MUERTE ---
+@onready var dano_flotante_escena = preload("res://dano_flotante.tscn")
+
 func recibir_daño(cantidad):
 	salud -= cantidad
-	
-	# Si la vida llega a cero, el enemigo muere
+	# Mostrar daño flotante
+	var flotante = dano_flotante_escena.instantiate()
+	get_parent().call_deferred("add_child", flotante)
+	flotante.global_position = global_position + Vector2(0, -20)
+	flotante.iniciar(cantidad)
 	if salud <= 0:
-		
-		# --- SISTEMA DE DROPEO (BOTÍN) ---
-		if randf() <= probabilidad_gema:
-			var gema = gema_escena.instantiate()
-			gema.valor_xp = xp_que_da
-			gema.global_position = global_position # <--- ¡PRIMERO le damos la posición!
-			get_parent().call_deferred("add_child", gema) # <--- ¡DESPUÉS la añadimos al mundo!
-			
-		queue_free() # El enemigo desaparece
+		var gema = gema_escena.instantiate()
+		get_parent().call_deferred("add_child", gema)
+		gema.global_position = global_position + Vector2(0, 20)
+		queue_free()
 
 func _on_hitbox_area_entered(area):
 	# Verificamos que lo que tocamos sea el jugador (si tiene la función recibir_daño)
@@ -63,30 +63,30 @@ func congelar(tiempo: float):
 	if congelado:
 		return
 	congelado = true
-	$Sprite2D.modulate = Color(0, 1, 1)
+	modulate = Color(0, 1, 1)
 	await get_tree().create_timer(tiempo).timeout
 	if not is_inside_tree():
 		return
 	congelado = false
-	$Sprite2D.modulate = Color(1, 1, 1)
+	modulate = Color(1, 1, 1)
 
 func ralentizar(porcentaje: float, tiempo: float):
 	if congelado:
 		return
-	$Sprite2D.modulate = Color(1, 1, 0)
+	modulate = Color(1, 1, 0)
 	velocidad = velocidad_base * (1.0 - porcentaje)
 	await get_tree().create_timer(tiempo).timeout
 	if not is_inside_tree():
 		return
 	velocidad = velocidad_base
 	if not congelado and not envenenado:
-		$Sprite2D.modulate = Color(1, 1, 1)
+		modulate = Color(1, 1, 1)
 
 func envenenar(dano_por_tick: int):
 	if envenenado:
 		return
 	envenenado = true
-	$Sprite2D.modulate = Color(0, 1, 0)
+	modulate = Color(0, 1, 0)
 	for i in range(3):
 		await get_tree().create_timer(1.0).timeout
 		if not is_inside_tree():
@@ -94,4 +94,4 @@ func envenenar(dano_por_tick: int):
 		recibir_daño(dano_por_tick)
 	envenenado = false
 	if not congelado:
-		$Sprite2D.modulate = Color(1, 1, 1)
+		modulate = Color(1, 1, 1)

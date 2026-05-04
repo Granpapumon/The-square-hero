@@ -1,16 +1,25 @@
 extends Area2D
 
-var velocidad = 600
+var velocidad = 800
 var porcentaje_ralentizacion = 0.60
 var tiempo_efecto = 1.0
-var direccion_vector = Vector2.ZERO
+var tiempo = 0.0
 
-func lanzar(dir):
-	direccion_vector = dir
-	rotation = dir.angle()
+# El rayo no usa direccion_vector — cae recto hacia abajo
+func lanzar(_dir):
+	# Ignora la dirección, siempre cae hacia abajo
+	rotation = PI / 2
 
 func _process(delta):
-	global_position += direccion_vector * velocidad * delta
+	tiempo += delta
+	global_position.y += velocidad * delta
+	queue_redraw()
+
+func _draw():
+	# Rayo amarillo/blanco vertical
+	draw_rect(Rect2(-3, -20, 6, 40), Color(1.0, 1.0, 0.2))
+	# Núcleo blanco
+	draw_rect(Rect2(-1, -20, 2, 40), Color(1.0, 1.0, 1.0))
 
 func _on_visible_on_screen_notifier_2d_screen_exited():
 	queue_free()

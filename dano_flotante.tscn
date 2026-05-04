@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bty6j1eyb0y7b"]
+
+[ext_resource type="Script" uid="uid://uibht3lfr0ir" path="res://dano_flotante.gd" id="1_qdo2h"]
+
+[node name="dano_flotante" type="Node2D" unique_id=1109145112 groups=["enemigos"]]
+script = ExtResource("1_qdo2h")
