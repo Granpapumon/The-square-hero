@@ -17,6 +17,6 @@ func actualizar_nivel(nivel):
 func mostrar_mensaje(texto: String):
 	$MensajeHabilidad.text = texto
 	$MensajeHabilidad.show()
-	await get_tree().create_timer(2.0).timeout
+	await get_tree().create_timer(2.5).timeout
 	if is_inside_tree():
 		$MensajeHabilidad.hide()

@@ -14,7 +14,7 @@ size = Vector2(3129, 133)
 [node name="Mundo" type="Node2D" unique_id=2083137370 groups=["mundo"]]
 script = ExtResource("1_fw4w5")
 
-[node name="CanvasLayer" parent="." unique_id=528968382 groups=["mundo"] instance=ExtResource("7_2hh7m")]
+[node name="PantallaPerks" parent="." unique_id=528968382 groups=["mundo"] instance=ExtResource("7_2hh7m")]
 
 [node name="MenuNivel" parent="." unique_id=1878790410 instance=ExtResource("2_aou4a")]
 visible = false

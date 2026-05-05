@@ -10,6 +10,7 @@ var saltando = false
 
 func _ready():
 	player = get_tree().get_first_node_in_group("player")
+	add_to_group("jefe")
 
 func _physics_process(delta):
 	if not is_on_floor():
@@ -23,21 +24,23 @@ func _physics_process(delta):
 
 func recibir_daño(cantidad):
 	if randf() <= 0.30:
-		$Sprite2D.modulate = Color(1, 1, 1, 0.5)
+		modulate = Color(1, 1, 1, 0.5)
 		await get_tree().create_timer(0.2).timeout
 		if not is_inside_tree():
 			return
-		$Sprite2D.modulate = Color(1, 1, 1, 1)
+		modulate = Color(1, 1, 1, 1)
 		return
 	salud -= cantidad
 	if salud <= 0:
+		var mundo = get_tree().get_first_node_in_group("mundo")
+		if mundo:
+			mundo.jefe_derrotado()
 		queue_free()
 
 func _on_timer_salto_timeout():
 	saltando = true
-	var direccion_azar = Vector2(randf_range(-1, 1), randf_range(-1, 1)).normalized()
+	var direccion_azar = Vector2(randf_range(-1, 1), -1).normalized()
 	velocity = direccion_azar * (velocidad * 4)
-	move_and_slide()
 	await get_tree().create_timer(0.4).timeout
 	if not is_inside_tree():
 		return

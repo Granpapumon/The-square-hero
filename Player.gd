@@ -23,7 +23,6 @@ var nivel_habilidad_2 = 0
 var tiene_dash = false
 var tiene_salto_doble = false
 var puede_dashar = true
-var esta_dasheando = false
 var saltos_restantes = 1
 const DASH_VELOCIDAD = 900.0
 const DASH_DURACION = 0.15
@@ -52,48 +51,34 @@ func _physics_process(delta):
 	if not is_on_floor():
 		velocity.y += gravedad * delta
 
-	# Salto (base + doble salto)
 	if Input.is_action_just_pressed("ui_accept") and saltos_restantes > 0:
 		velocity.y = fuerza_salto
 		saltos_restantes -= 1
 
-	# Dash (tecla Shift — agrégala en InputMap)
 	if tiene_dash and puede_dashar and Input.is_action_just_pressed("dash"):
 		var dir = Input.get_axis("ui_left", "ui_right")
 		if dir != 0:
 			_ejecutar_dash(dir)
 
-	if not esta_dasheando:
-		var direction = Input.get_axis("ui_left", "ui_right")
-		if direction:
-			velocity.x = direction * velocidad_actual
-		else:
-			velocity.x = move_toward(velocity.x, 0, velocidad_actual)
+	var direction = Input.get_axis("ui_left", "ui_right")
+	if direction:
+		velocity.x = direction * velocidad_actual
 	else:
-		# Opcional: Esto congela la gravedad mientras dasheas en el aire
-		velocity.y = 0 
-		
+		velocity.x = move_toward(velocity.x, 0, velocidad_actual)
+
 	move_and_slide()
 
 func _ejecutar_dash(dir: float):
 	puede_dashar = false
-	esta_dasheando = true # <- BLOQUEA EL MOVIMIENTO NORMAL
-	
 	set_collision_mask_value(1, false)
 	velocity.x = dir * DASH_VELOCIDAD
-	
 	await get_tree().create_timer(DASH_DURACION).timeout
 	if not is_inside_tree():
 		return
-		
-	esta_dasheando = false # <- DEVUELVE EL CONTROL AL JUGADOR
 	set_collision_mask_value(1, true)
-	
-	# Inicia el tiempo de recarga (cooldown)
 	await get_tree().create_timer(0.8).timeout
 	if not is_inside_tree():
 		return
-		
 	puede_dashar = true
 
 # --- PERKS ---
@@ -162,7 +147,7 @@ func _on_timer_veneno_timeout():
 # --- XP Y NIVELES ---
 func ganar_xp(cantidad):
 	xp_actual += cantidad
-	var hud = get_tree().get_first_node_in_group("HUD")
+	var hud = get_tree().get_first_node_in_group("hud")
 	if hud:
 		hud.actualizar_xp(xp_actual, xp_necesaria)
 	if xp_actual >= xp_necesaria:
@@ -172,29 +157,22 @@ func subir_nivel():
 	nivel += 1
 	xp_actual = 0
 	xp_necesaria += 2
-
-	var hud = get_tree().get_first_node_in_group("HUD")
+	var hud = get_tree().get_first_node_in_group("hud")
 	if hud:
 		hud.actualizar_xp(0, xp_necesaria)
 		hud.actualizar_nivel(nivel)
-
-	# Jefe en nivel 10
 	if nivel == 10:
 		var mundo = get_tree().get_first_node_in_group("mundo")
 		if mundo:
 			mundo.spawner_jefe_pentagono()
-		return  # No mostrar menú en nivel de jefe
-
+		return
 	get_tree().paused = true
 	var menu = get_tree().get_first_node_in_group("menu_nivel")
-
 	if nivel == 5 or nivel == 15:
 		if hud:
 			hud.mostrar_mensaje("¡Nueva habilidad desbloqueada!")
-		menu.configurar_modo_habilidades()
 	else:
 		menu.configurar_modo_atributos()
-
 	menu.show()
 
 # --- DESBLOQUEAR HABILIDAD ---
