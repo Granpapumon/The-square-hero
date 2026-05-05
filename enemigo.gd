@@ -5,43 +5,59 @@ extends CharacterBody2D
 var velocidad_base: float
 @export var salud = 3
 @export var dano_contacto = 10
+@export var probabilidad_gema: float = 1.0
+@export var xp_que_da: int = 1
 
 # --- ESTADOS ---
 var congelado = false
 var envenenado = false
+var puede_hacer_daño = true
 
 var gravedad = ProjectSettings.get_setting("physics/2d/default_gravity")
 var player = null
 
 @onready var gema_escena = preload("res://gema_xp.tscn")
-@export var probabilidad_gema: float = 1.0 # 1.0 es 100%, 0.75 es 75%, etc.
-@export var xp_que_da: int = 1
+@onready var dano_flotante_escena = preload("res://dano_flotante.tscn")
 
 func _ready():
+	velocidad_base = velocidad
 	player = get_tree().get_first_node_in_group("player")
+	var timer = Timer.new()
+	timer.name = "TimerDaño"
+	timer.wait_time = 0.2
+	timer.one_shot = true
+	timer.timeout.connect(_on_timer_daño_timeout)
+	add_child(timer)
 
 # --- MOVIMIENTO ---
 func _physics_process(delta):
 	if congelado:
 		return
-
 	if not is_on_floor():
 		velocity.y += gravedad * delta
-
 	if player:
 		var direccion = global_position.direction_to(player.global_position)
 		velocity.x = velocidad if direccion.x > 0 else -velocidad
 	else:
 		velocity.x = move_toward(velocity.x, 0, velocidad)
-
 	move_and_slide()
 
-# --- DAÑO Y MUERTE ---
-@onready var dano_flotante_escena = preload("res://dano_flotante.tscn")
+	# Daño continuo al jugador
+	if puede_hacer_daño:
+		for area in $Hitbox.get_overlapping_areas():
+			if area.name == "Hurtbox":
+				if area.get_parent().has_method("recibir_daño"):
+					area.get_parent().recibir_daño(dano_contacto)
+					puede_hacer_daño = false
+					$TimerDaño.start()
+					break
 
+func _on_timer_daño_timeout():
+	puede_hacer_daño = true
+
+# --- DAÑO Y MUERTE ---
 func recibir_daño(cantidad):
 	salud -= cantidad
-	# Mostrar daño flotante
 	var flotante = dano_flotante_escena.instantiate()
 	get_parent().call_deferred("add_child", flotante)
 	flotante.global_position = global_position + Vector2(0, -20)
@@ -51,12 +67,6 @@ func recibir_daño(cantidad):
 		get_parent().call_deferred("add_child", gema)
 		gema.global_position = global_position + Vector2(0, 20)
 		queue_free()
-
-func _on_hitbox_area_entered(area):
-	# Verificamos que lo que tocamos sea el jugador (si tiene la función recibir_daño)
-	if area.get_parent().has_method("recibir_daño"):
-		# Le inyectamos nuestro daño de contacto
-		area.get_parent().recibir_daño(dano_contacto)
 
 # --- EFECTOS DE HABILIDADES ---
 func congelar(tiempo: float):

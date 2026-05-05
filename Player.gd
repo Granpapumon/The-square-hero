@@ -21,6 +21,7 @@ var nivel_habilidad_2 = 0
 
 # --- PERKS ---
 var tiene_dash = false
+var dasheando = false
 var tiene_salto_doble = false
 var puede_dashar = true
 var saltos_restantes = 1
@@ -37,6 +38,7 @@ const DASH_DURACION = 0.15
 # --- VIDA ---
 func recibir_daño(cantidad):
 	salud -= cantidad
+	print("DAÑO RECIBIDO: ", cantidad, " - Salud restante: ", salud)
 	if salud <= 0:
 		morir()
 
@@ -60,21 +62,25 @@ func _physics_process(delta):
 		if dir != 0:
 			_ejecutar_dash(dir)
 
-	var direction = Input.get_axis("ui_left", "ui_right")
-	if direction:
-		velocity.x = direction * velocidad_actual
-	else:
-		velocity.x = move_toward(velocity.x, 0, velocidad_actual)
+	# El movimiento normal solo ocurre si NO estás dasheando
+	if not dasheando:
+		var direction = Input.get_axis("ui_left", "ui_right")
+		if direction:
+			velocity.x = direction * velocidad_actual
+		else:
+			velocity.x = move_toward(velocity.x, 0, velocidad_actual)
 
 	move_and_slide()
 
 func _ejecutar_dash(dir: float):
 	puede_dashar = false
+	dasheando = true
 	set_collision_mask_value(1, false)
 	velocity.x = dir * DASH_VELOCIDAD
 	await get_tree().create_timer(DASH_DURACION).timeout
 	if not is_inside_tree():
 		return
+	dasheando = false
 	set_collision_mask_value(1, true)
 	await get_tree().create_timer(0.8).timeout
 	if not is_inside_tree():
@@ -147,7 +153,7 @@ func _on_timer_veneno_timeout():
 # --- XP Y NIVELES ---
 func ganar_xp(cantidad):
 	xp_actual += cantidad
-	var hud = get_tree().get_first_node_in_group("hud")
+	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.actualizar_xp(xp_actual, xp_necesaria)
 	if xp_actual >= xp_necesaria:
@@ -157,7 +163,7 @@ func subir_nivel():
 	nivel += 1
 	xp_actual = 0
 	xp_necesaria += 2
-	var hud = get_tree().get_first_node_in_group("hud")
+	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.actualizar_xp(0, xp_necesaria)
 		hud.actualizar_nivel(nivel)
@@ -171,6 +177,7 @@ func subir_nivel():
 	if nivel == 5 or nivel == 15:
 		if hud:
 			hud.mostrar_mensaje("¡Nueva habilidad desbloqueada!")
+			menu.configurar_modo_habilidades()
 	else:
 		menu.configurar_modo_atributos()
 	menu.show()
