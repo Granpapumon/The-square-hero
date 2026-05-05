@@ -27,7 +27,7 @@ var tiene_salto_doble = false
 var puede_dashar = true
 var saltos_restantes = 1
 const DASH_VELOCIDAD = 3000.0
-const DASH_DURACION = 0.15
+const DASH_DURACION = 0.05
 
 # --- ESCENAS ---
 @onready var proyectil_escena        = preload("res://proyectil.tscn")

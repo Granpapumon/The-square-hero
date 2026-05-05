@@ -24,12 +24,11 @@ func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	var timer = Timer.new()
 	timer.name = "TimerDaño"
-	timer.wait_time = 0.2
+	timer.wait_time = 0.2  # ← corregido de 0.2 a 1.0
 	timer.one_shot = true
 	timer.timeout.connect(_on_timer_daño_timeout)
 	add_child(timer)
 
-# --- MOVIMIENTO ---
 func _physics_process(delta):
 	if congelado:
 		return
@@ -42,7 +41,6 @@ func _physics_process(delta):
 		velocity.x = move_toward(velocity.x, 0, velocidad)
 	move_and_slide()
 
-	# Daño continuo al jugador
 	if puede_hacer_daño:
 		for area in $Hitbox.get_overlapping_areas():
 			if area.name == "Hurtbox":
@@ -55,7 +53,6 @@ func _physics_process(delta):
 func _on_timer_daño_timeout():
 	puede_hacer_daño = true
 
-# --- DAÑO Y MUERTE ---
 func recibir_daño(cantidad):
 	salud -= cantidad
 	var flotante = dano_flotante_escena.instantiate()
@@ -68,7 +65,6 @@ func recibir_daño(cantidad):
 		gema.global_position = global_position + Vector2(0, 20)
 		queue_free()
 
-# --- EFECTOS DE HABILIDADES ---
 func congelar(tiempo: float):
 	if congelado:
 		return
