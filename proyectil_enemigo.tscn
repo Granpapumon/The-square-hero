@@ -1,18 +1,19 @@
-[gd_scene format=3 uid="uid://dh3nvdvaljbs5"]
+[gd_scene format=3 uid="uid://c4shnp37u6rgt"]
 
-[ext_resource type="Texture2D" uid="uid://rmav1krs4edp" path="res://icon.svg" id="1_bg2bl"]
-[ext_resource type="Script" uid="uid://5rntwa6ftlv3" path="res://proyectil.gd" id="1_etydj"]
+[ext_resource type="Script" uid="uid://cib0kxwpxhkld" path="res://proyectil_enemigo.gd" id="1_47wqc"]
+[ext_resource type="Texture2D" uid="uid://rmav1krs4edp" path="res://icon.svg" id="2_envj1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_etydj"]
 size = Vector2(54, 13)
 
-[node name="proyectil2" type="Area2D" unique_id=198901908]
-collision_mask = 2
-script = ExtResource("1_etydj")
+[node name="proyectil_enemigo" type="Area2D" unique_id=198901908]
+collision_mask = 7
+script = ExtResource("1_47wqc")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1908298996]
+modulate = Color(0, 0, 0, 1)
 scale = Vector2(0.4, 0.1)
-texture = ExtResource("1_bg2bl")
+texture = ExtResource("2_envj1")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=288831420]
 position = Vector2(0, 0.5)

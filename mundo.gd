@@ -2,16 +2,18 @@ extends Node2D
 
 @onready var player = get_tree().get_first_node_in_group("player")
 
-@onready var escena_triangulo       = preload("res://enemigo_triangulo.tscn")
-@onready var escena_rectangulo      = preload("res://enemigo_rectangulo.tscn")
-@onready var escena_pentagono       = preload("res://enemigo_pentagono.tscn")
-@onready var escena_hexagono        = preload("res://enemigo_hexagono.tscn")
-@onready var escena_heptagono       = preload("res://enemigo_heptagono.tscn")
-@onready var escena_octagono        = preload("res://enemigo_octagono.tscn")
-@onready var escena_jefe_pentagono  = preload("res://jefe_pentagono.tscn")
+@onready var escena_triangulo      = preload("res://enemigo_triangulo.tscn")
+@onready var escena_rectangulo     = preload("res://enemigo_rectangulo.tscn")
+@onready var escena_pentagono      = preload("res://enemigo_pentagono.tscn")
+@onready var escena_hexagono       = preload("res://enemigo_hexagono.tscn")
+@onready var escena_heptagono      = preload("res://enemigo_heptagono.tscn")
+@onready var escena_octagono       = preload("res://enemigo_octagono.tscn")
+@onready var escena_jefe_pentagono = preload("res://jefe_pentagono.tscn")
+@onready var escena_estrella       = preload("res://enemigo_estrella.tscn")
 
 const MAX_ENEMIGOS = 25
 var jefe_activo = false
+var estrella_spawneada = false
 
 func _ready():
 	add_to_group("mundo")
@@ -28,8 +30,21 @@ func _obtener_escena_enemigo() -> PackedScene:
 func _on_spawner_timeout() -> void:
 	if not is_instance_valid(player) or jefe_activo:
 		return
+
+	# Spawn de la Estrella al llegar a nivel 3
+	if player.nivel >= 3 and not estrella_spawneada:
+		estrella_spawneada = true
+		var estrella = escena_estrella.instantiate()
+		var x = player.global_position.x + 500
+		estrella.global_position = Vector2(x, -50)
+		add_child(estrella)
+		var hud = get_tree().get_first_node_in_group("HUD")
+		if hud:
+			hud.mostrar_mensaje("⚠ ¡Enemigo especial!")
+
 	if get_tree().get_nodes_in_group("enemigos").size() >= MAX_ENEMIGOS:
 		return
+
 	var nuevo_enemigo = _obtener_escena_enemigo().instantiate()
 	var x_min = -1200
 	var x_max = 1200
@@ -50,12 +65,12 @@ func spawner_jefe_pentagono():
 	var jefe = escena_jefe_pentagono.instantiate()
 	jefe.global_position = Vector2(player.global_position.x + 400, -50)
 	add_child(jefe)
-	var hud = get_tree().get_first_node_in_group("hud")
+	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.mostrar_mensaje("⚠ ¡JEFE APARECE!")
 
 func jefe_derrotado():
 	jefe_activo = false
-	var hud = get_tree().get_first_node_in_group("hud")
+	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.mostrar_mensaje("¡JEFE DERROTADO!")

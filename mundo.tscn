@@ -23,7 +23,6 @@ visible = false
 position = Vector2(0, -1)
 
 [node name="suelo" type="StaticBody2D" parent="." unique_id=2099538738]
-collision_layer = 2
 collision_mask = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="suelo" unique_id=1555740171]
