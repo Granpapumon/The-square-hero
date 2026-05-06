@@ -6,6 +6,7 @@
 script = ExtResource("1_37p78")
 
 [node name="BarraXP" type="ProgressBar" parent="." unique_id=776964876]
+texture_filter = 1
 offset_left = 17.0
 offset_top = 26.0
 offset_right = 289.0

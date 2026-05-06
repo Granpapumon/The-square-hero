@@ -4,23 +4,21 @@
 [ext_resource type="Texture2D" uid="uid://dcnp2e88d3f17" path="res://estrella.JPG" id="2_1qu2r"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_becj5"]
-size = Vector2(194, 199)
+size = Vector2(180, 180)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a5tj2"]
-size = Vector2(195, 200)
+size = Vector2(180, 180)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_moxti"]
-size = Vector2(198, 200)
+size = Vector2(180, 180)
 
 [node name="Enemigo_estrella" type="CharacterBody2D" unique_id=2006028527 groups=["enemigos"]]
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_47q0o")
-salud = 30
-probabilidad_gema = 0.0
-xp_que_da = 1
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1484610955]
+visible = false
 position = Vector2(-1.0000029, -5.9604645e-08)
 scale = Vector2(0.024206698, 0.02505328)
 texture = ExtResource("2_1qu2r")

@@ -2,62 +2,73 @@
 
 [ext_resource type="Script" uid="uid://b7e1y4djjxqkd" path="res://menu_nivel.gd" id="1_r51ry"]
 
-[node name="MenuNivel" type="CanvasLayer" unique_id=1878790410 groups=["menu_nivel"]]
+[node name="MenuNivel" type="CanvasLayer" unique_id=2014115233]
 process_mode = 3
+
+[node name="Contenedor" type="Control" parent="." unique_id=234215380 groups=["menu_nivel"]]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_r51ry")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=869674879]
+[node name="ColorRect" type="ColorRect" parent="Contenedor" unique_id=869674879]
+layout_mode = 0
 offset_right = 1281.0
 offset_bottom = 717.0
 color = Color(0, 0, 0, 0.5019608)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ColorRect" unique_id=1401008705]
+[node name="VBoxContainer" type="VBoxContainer" parent="Contenedor/ColorRect" unique_id=1401008705]
 layout_mode = 0
 offset_left = 440.0
 offset_top = 227.0
 offset_right = 821.0
 offset_bottom = 456.0
 
-[node name="ATAQUE" type="Button" parent="ColorRect/VBoxContainer" unique_id=930141755]
+[node name="ATAQUE" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=930141755]
 layout_mode = 2
+theme_override_font_sizes/font_size = 33
 text = "ATAQUE"
 
-[node name="SALTO" type="Button" parent="ColorRect/VBoxContainer" unique_id=1493638452]
+[node name="SALTO" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=1493638452]
 layout_mode = 2
+theme_override_font_sizes/font_size = 33
 text = "SALTO"
 
-[node name="VELOCIDAD" type="Button" parent="ColorRect/VBoxContainer" unique_id=1886628268]
+[node name="VELOCIDAD" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=1886628268]
 layout_mode = 2
+theme_override_font_sizes/font_size = 33
 text = "VELOCIDAD"
 
-[node name="CADENCIA" type="Button" parent="ColorRect/VBoxContainer" unique_id=1267057128]
+[node name="CADENCIA" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=1267057128]
 layout_mode = 2
+theme_override_font_sizes/font_size = 33
 text = "VELOCIDAD DE ATAQUE"
 
-[node name="FUEGO" type="Button" parent="ColorRect/VBoxContainer" unique_id=1475892656]
+[node name="FUEGO" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=1475892656]
+visible = false
 layout_mode = 2
 text = "FUEGO"
 
-[node name="HIELO" type="Button" parent="ColorRect/VBoxContainer" unique_id=1688684152]
+[node name="HIELO" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=1688684152]
+visible = false
 layout_mode = 2
 text = "HIELO"
 
-[node name="RAYO" type="Button" parent="ColorRect/VBoxContainer" unique_id=846623878]
+[node name="RAYO" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=846623878]
+visible = false
 layout_mode = 2
 text = "RAYO"
 
-[node name="VENENO" type="Button" parent="ColorRect/VBoxContainer" unique_id=1380498023]
+[node name="VENENO" type="Button" parent="Contenedor/ColorRect/VBoxContainer" unique_id=1380498023]
+visible = false
 layout_mode = 2
 text = "VENENO"
 
-[connection signal="pressed" from="ColorRect/VBoxContainer/ATAQUE" to="." method="_on_boton_ataque_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/ATAQUE" to="." method="_on_button_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/SALTO" to="." method="_on_boton_salto_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/SALTO" to="." method="_on_button_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/VELOCIDAD" to="." method="_on_boton_velocidad_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/VELOCIDAD" to="." method="_on_button_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/CADENCIA" to="." method="_on_boton_cadencia_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/FUEGO" to="." method="_on_boton_fuego_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/HIELO" to="." method="_on_boton_hielo_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/RAYO" to="." method="_on_boton_rayo_pressed"]
-[connection signal="pressed" from="ColorRect/VBoxContainer/VENENO" to="." method="_on_boton_veneno_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/VBoxContainer/ATAQUE" to="Contenedor" method="_on_ataque_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/VBoxContainer/SALTO" to="Contenedor" method="_on_salto_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/VBoxContainer/VELOCIDAD" to="Contenedor" method="_on_velocidad_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/VBoxContainer/CADENCIA" to="Contenedor" method="_on_cadencia_pressed"]

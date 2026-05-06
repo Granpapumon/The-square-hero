@@ -20,6 +20,7 @@ collision_mask = 3
 script = ExtResource("1_a5tj2")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1484610955]
+visible = false
 modulate = Color(1, 0.047058824, 0.03529412, 1)
 texture = SubResource("PlaceholderTexture2D_becj5")
 

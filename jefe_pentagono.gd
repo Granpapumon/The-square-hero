@@ -8,6 +8,40 @@ var gravedad = ProjectSettings.get_setting("physics/2d/default_gravity")
 var player = null
 var saltando = false
 
+# Jefe de 30x30 (300x300px) con la forma irregular solicitada
+var pixel_art = [
+	"............BBBB..............",
+	"...........BEEEEB.............",
+	"..........BEMMMMEB............",
+	".........BEEEEEEEEB...........",
+	"........BEMMMMMMMMEB..........",
+	".......BEEEEEEEEEEEEB.........",
+	"......BEMMMMMMMMMMMMEB........",
+	".....BEEEEEEEEEEEEEEEEB.......",
+	"....BEMMMMMMMMMMMMMMMMEB......",
+	"...BEEEEEEEEEEEEEEEEEEEEB.....",
+	"..BEMMMMMMMMMMMMMMMMMMMMEB....",
+	".BEEEEEEEEEEECCEEEECCEEEEEB...",
+	"BEMMMMMMMMMMCDDCEMMDDCEMMMMEB.",
+	"BBBBEEEEEEEECCCCEEECCCCEEEEEEB",
+	"...BBBBMMMMMMMMMMMMMMMMMMMMMME",
+	"......BBBBEEEEEEEEEEEEEEEEEEEB",
+	".........BBBBMMMMMMMMMMMMMMMEB",
+	"............BBBBEEEEEEEEEEEEEB",
+	"..............BBBBMMMMMMMMMMEB",
+	"................BBBBEEEEEEEEEB",
+	"..................BBBBMMMMMMEB",
+	"....................BBBBEEEEEB",
+	"......................BBBBMMMB",
+	"........................BBBBEE",
+	"..........................BBBM",
+	"............................BB",
+	"..............................",
+	"..............................",
+	"..............................",
+	".............................."
+]
+
 func _ready():
 	player = get_tree().get_first_node_in_group("player")
 	add_to_group("jefe")
@@ -50,3 +84,30 @@ func _on_hitbox_area_entered(area):
 	if area.name == "Hurtbox":
 		if area.get_parent().has_method("recibir_daño"):
 			area.get_parent().recibir_daño(dano_contacto)
+
+func _process(_delta):
+	queue_redraw()
+
+func _draw():
+	# --- AJUSTADO A 10.0 (30 x 10 = 300px) ---
+	var pixel_size = 10.0 
+	var offset_x = - (pixel_art[0].length() * pixel_size) / 2.0
+	var offset_y = - (pixel_art.size() * pixel_size) / 2.0
+	
+	# El jefe mira al jugador invirtiendo el dibujo en X
+	var direccion_espejo = -1 if velocity.x < 0 else 1
+	draw_set_transform(Vector2.ZERO, 0, Vector2(direccion_espejo, 1))
+	
+	for y in range(pixel_art.size()):
+		var row = pixel_art[y]
+		for x in range(row.length()):
+			var letra = row[x]
+			if letra == ".": continue
+			var color = Color.TRANSPARENT
+			match letra:
+				"B": color = Color.BLACK
+				"C": color = Color.WHITE
+				"D": color = Color.RED
+				"E": color = Color(0.8, 0.2, 0.2) 
+				"M": color = Color(0.4, 0.1, 0.1) 
+			draw_rect(Rect2(offset_x + (x * pixel_size), offset_y + (y * pixel_size), pixel_size, pixel_size), color)

@@ -1,14 +1,12 @@
 extends CharacterBody2D
 
-# Hereda las estadísticas del enemigo base pero con comportamiento especial
 @export var velocidad = 150.0
 var velocidad_base: float
 @export var salud = 15
 @export var dano_contacto = 15
 @export var probabilidad_gema: float = 1.0
-@export var xp_que_da: int = 3  # Da más XP por ser especial
+@export var xp_que_da: int = 3 
 
-# --- ESTADOS ---
 var congelado = false
 var envenenado = false
 var puede_hacer_daño = true
@@ -20,10 +18,31 @@ var player = null
 @onready var dano_flotante_escena = preload("res://dano_flotante.tscn")
 @onready var proyectil_escena = preload("res://proyectil_enemigo.tscn")
 
+# Estrella exacta de 18x18 (180x180px)
+var pixel_art = [
+	"........BB........",
+	".......BEEB.......",
+	".......BEMB.......",
+	"......BEEEB.......",
+	"......BEMMEB......",
+	"BBBBBBEEEEEBBBBBB.",
+	".BEMMMEEMMEEMMMEB.",
+	"..BEEEEEEEEEEEEB..",
+	"...BEMMMEEMMMEB...",
+	"....BEEEEEEEEB....",
+	"....BEMCCEECCB....",
+	"...BEEEDDBDDMEB...",
+	"...BEMMMMBMMMMEB..",
+	"..BEEEEEEEEEEEEB..",
+	"..BEMMEB..BEMMEB..",
+	".BEEEB......BEEEB.",
+	".BEMB........BEMB.",
+	"BBBB..........BBBB"
+]
+
 func _ready():
 	velocidad_base = velocidad
 	player = get_tree().get_first_node_in_group("player")
-	# Timer de daño continuo
 	var timer_daño = Timer.new()
 	timer_daño.name = "TimerDaño"
 	timer_daño.wait_time = 1.0
@@ -31,12 +50,9 @@ func _ready():
 	timer_daño.timeout.connect(_on_timer_daño_timeout)
 	add_child(timer_daño)
 
-# --- MOVIMIENTO ---
 func _physics_process(delta):
-	if congelado:
-		return
-	if not is_on_floor():
-		velocity.y += gravedad * delta
+	if congelado: return
+	if not is_on_floor(): velocity.y += gravedad * delta
 	if player:
 		var direccion = global_position.direction_to(player.global_position)
 		velocity.x = velocidad if direccion.x > 0 else -velocidad
@@ -44,30 +60,25 @@ func _physics_process(delta):
 		velocity.x = move_toward(velocity.x, 0, velocidad)
 	move_and_slide()
 
-	# Daño continuo por contacto
 	if puede_hacer_daño:
 		for area in $Hitbox.get_overlapping_areas():
-			if area.name == "Hurtbox":
-				if area.get_parent().has_method("recibir_daño"):
-					area.get_parent().recibir_daño(dano_contacto)
-					puede_hacer_daño = false
-					$TimerDaño.start()
-					break
+			if area.name == "Hurtbox" and area.get_parent().has_method("recibir_daño"):
+				area.get_parent().recibir_daño(dano_contacto)
+				puede_hacer_daño = false
+				$TimerDaño.start()
+				break
 
 func _on_timer_daño_timeout():
 	puede_hacer_daño = true
 
-# --- DISPARO HACIA EL JUGADOR ---
 func _on_timer_disparo_timeout():
-	if not is_instance_valid(player) or not is_inside_tree():
-		return
+	if not is_instance_valid(player) or not is_inside_tree(): return
 	var bala = proyectil_escena.instantiate()
 	bala.dano = 5
 	get_tree().current_scene.add_child(bala)
 	bala.global_position = global_position
 	bala.lanzar(global_position.direction_to(player.global_position))
 
-# --- DAÑO Y MUERTE ---
 func recibir_daño(cantidad):
 	salud -= cantidad
 	var flotante = dano_flotante_escena.instantiate()
@@ -80,40 +91,66 @@ func recibir_daño(cantidad):
 		gema.global_position = global_position + Vector2(0, 20)
 		queue_free()
 
-# --- EFECTOS DE HABILIDADES ---
 func congelar(tiempo: float):
-	if congelado:
-		return
+	if congelado: return
 	congelado = true
 	modulate = Color(0, 1, 1)
 	await get_tree().create_timer(tiempo).timeout
-	if not is_inside_tree():
-		return
+	if not is_inside_tree(): return
 	congelado = false
 	modulate = Color(1, 1, 1)
 
 func ralentizar(porcentaje: float, tiempo: float):
-	if congelado:
-		return
+	if congelado: return
 	modulate = Color(1, 1, 0)
 	velocidad = velocidad_base * (1.0 - porcentaje)
 	await get_tree().create_timer(tiempo).timeout
-	if not is_inside_tree():
-		return
+	if not is_inside_tree(): return
 	velocidad = velocidad_base
-	if not congelado and not envenenado:
-		modulate = Color(1, 1, 1)
+	if not congelado and not envenenado: modulate = Color(1, 1, 1)
 
 func envenenar(dano_por_tick: int):
-	if envenenado:
-		return
+	if envenenado: return
 	envenenado = true
 	modulate = Color(0, 1, 0)
 	for i in range(3):
 		await get_tree().create_timer(1.0).timeout
-		if not is_inside_tree():
-			return
+		if not is_inside_tree(): return
 		recibir_daño(dano_por_tick)
 	envenenado = false
-	if not congelado:
-		modulate = Color(1, 1, 1)
+	if not congelado: modulate = Color(1, 1, 1)
+
+func _process(_delta):
+	# Animación sutil de escala (respiración)
+	var pulso = 1.0 + (sin(Time.get_ticks_msec() * 0.005) * 0.05)
+	scale = Vector2(pulso, 1.0 / pulso) # Efecto muelle
+	queue_redraw()
+
+func _draw():
+	# --- AJUSTADO A 10.0 (18 x 10 = 180px) ---
+	var pixel_size = 10.0 
+	var offset_x = - (pixel_art[0].length() * pixel_size) / 2.0
+	var offset_y = - (pixel_art.size() * pixel_size) / 2.0
+# CALCULAR SI VA A DISPARAR PRONTO
+	var avisando_disparo = false
+	if is_instance_valid($TimerDisparo):
+		if $TimerDisparo.time_left < 0.5: # 0.5 segundos antes de disparar
+			avisando_disparo = true
+
+	for y in range(pixel_art.size()):
+		var row = pixel_art[y]
+		for x in range(row.length()):
+			var letra = row[x]
+			if letra == ".": continue
+			var color = Color.TRANSPARENT
+			match letra:
+				"B": color = Color.BLACK
+				"C": 
+					# Brilla en blanco/azul si dispara
+					color = Color.WHITE if not avisando_disparo else Color(0.5, 0.8, 1.0)
+				"D": color = Color.BLACK 
+				"E": 
+					# Se vuelve roja si va a disparar
+					color = Color(1.0, 0.6, 0.0) if not avisando_disparo else Color(1.0, 0.2, 0.2)
+				"M": color = Color(0.8, 0.3, 0.0) if not avisando_disparo else Color(0.5, 0, 0)
+			draw_rect(Rect2(offset_x + (x * pixel_size), offset_y + (y * pixel_size), pixel_size, pixel_size), color)

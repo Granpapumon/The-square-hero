@@ -16,6 +16,7 @@ collision_layer = 8
 script = ExtResource("1_a1tci")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=705506276]
+visible = false
 modulate = Color(1, 0.7790548, 0.5609527, 0.9647059)
 texture = SubResource("PlaceholderTexture2D_vvpig")
 

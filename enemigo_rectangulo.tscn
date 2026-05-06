@@ -3,13 +3,13 @@
 [ext_resource type="Script" uid="uid://b07a4aydpeaw7" path="res://enemigo.gd" id="1_q14dq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_becj5"]
-size = Vector2(133, 240)
+size = Vector2(150, 240)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_a5tj2"]
-size = Vector2(128, 240)
+size = Vector2(150, 240)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_moxti"]
-size = Vector2(130.5, 240)
+size = Vector2(150, 240)
 
 [node name="Enemigo" type="CharacterBody2D" unique_id=2006028527 groups=["enemigos"]]
 collision_mask = 3
@@ -38,6 +38,7 @@ position = Vector2(2.75, 1)
 shape = SubResource("RectangleShape2D_moxti")
 
 [node name="Polygon2D" type="Polygon2D" parent="." unique_id=186776185]
+visible = false
 position = Vector2(33, 8.489621)
 scale = Vector2(1.0336134, 1.6391093)
 polygon = PackedVector2Array(-89, -79, 30, -78, 23.554321, 0.64505005, 31, 69, -87, 70, -88.00922, -5.1881714)

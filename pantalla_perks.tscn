@@ -2,16 +2,27 @@
 
 [ext_resource type="Script" uid="uid://4kic422m7soq" path="res://pantalla_perks.gd" id="1_xyy51"]
 
-[node name="PantallaPerks" type="CanvasLayer" unique_id=528968382]
+[node name="PantallaPerks" type="CanvasLayer" unique_id=193529422]
 process_mode = 3
+
+[node name="Contenedor" type="Control" parent="." unique_id=103079333 groups=["pantalla_perks"]]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_xyy51")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=1199570982]
+[node name="ColorRect" type="ColorRect" parent="Contenedor" unique_id=1199570982]
+layout_mode = 0
 offset_right = 1280.0
 offset_bottom = 720.0
+mouse_filter = 2
 color = Color(1, 1, 1, 0.18039216)
 
-[node name="DASH" type="Button" parent="ColorRect" unique_id=460639279]
+[node name="DASH" type="Button" parent="Contenedor/ColorRect" unique_id=460639279]
 layout_mode = 0
 offset_left = 488.0
 offset_top = 72.0
@@ -20,7 +31,7 @@ offset_bottom = 172.0
 theme_override_font_sizes/font_size = 45
 text = "DASH"
 
-[node name="SALTO DOBLE" type="Button" parent="ColorRect" unique_id=278889722]
+[node name="SALTO DOBLE" type="Button" parent="Contenedor/ColorRect" unique_id=278889722]
 layout_mode = 0
 offset_left = 491.0
 offset_top = 196.0
@@ -29,7 +40,7 @@ offset_bottom = 305.0
 theme_override_font_sizes/font_size = 45
 text = "SALTO DOBLE"
 
-[node name="VIDA DOBLE" type="Button" parent="ColorRect" unique_id=1863627685]
+[node name="VIDA DOBLE" type="Button" parent="Contenedor/ColorRect" unique_id=1863627685]
 layout_mode = 0
 offset_left = 493.0
 offset_top = 327.0
@@ -38,7 +49,7 @@ offset_bottom = 438.0
 theme_override_font_sizes/font_size = 45
 text = "VIDA DOBLE"
 
-[node name="RANGO" type="Button" parent="ColorRect" unique_id=1851107491]
+[node name="RANGO" type="Button" parent="Contenedor/ColorRect" unique_id=1851107491]
 layout_mode = 0
 offset_left = 490.0
 offset_top = 463.0
@@ -47,7 +58,7 @@ offset_bottom = 569.0
 theme_override_font_sizes/font_size = 45
 text = "RANGO"
 
-[connection signal="pressed" from="ColorRect/DASH" to="." method="_on_boton_dash_pressed"]
-[connection signal="pressed" from="ColorRect/SALTO DOBLE" to="." method="_on_boton_salto_doble_pressed"]
-[connection signal="pressed" from="ColorRect/VIDA DOBLE" to="." method="_on_boton_vida_doble_pressed"]
-[connection signal="pressed" from="ColorRect/RANGO" to="." method="_on_boton_rango_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/DASH" to="Contenedor" method="_on_dash_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/SALTO DOBLE" to="Contenedor" method="_on_salto_doble_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/VIDA DOBLE" to="Contenedor" method="_on_vida_doble_pressed"]
+[connection signal="pressed" from="Contenedor/ColorRect/RANGO" to="Contenedor" method="_on_rango_pressed"]

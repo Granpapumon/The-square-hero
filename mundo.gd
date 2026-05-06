@@ -74,3 +74,38 @@ func jefe_derrotado():
 	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.mostrar_mensaje("¡JEFE DERROTADO!")
+		
+func _process(_delta):
+	queue_redraw()
+
+func _draw():
+	var ancho_total = 3200.0
+	var alto_total = 200.0 # Un poco más alto para que luzca la tierra
+	var offset_x = -ancho_total / 2.0
+	var y_suelo = 16.0 
+
+	# 1. BORDE NEGRO DE TODO EL BLOQUE (Estética Pin)
+	draw_rect(Rect2(offset_x - 4, y_suelo - 4, ancho_total + 8, alto_total + 8), Color.BLACK)
+
+	# 2. CAPA DE TIERRA / PIEDRA (Fondo oscuro)
+	draw_rect(Rect2(offset_x, y_suelo, ancho_total, alto_total), Color(0.12, 0.1, 0.15))
+
+	# 3. DIBUJO DE BALDOSAS TIPO PIEDRA (Repetitivo)
+	var tile_size = 64.0
+	for x in range(int(offset_x), int(offset_x + ancho_total), int(tile_size)):
+		# Piedras decorativas en la tierra
+		if int(floor(float(x) / tile_size)) % 3 == 0:
+			draw_circle(Vector2(x + 32, y_suelo + 60), 10, Color(0.2, 0.18, 0.25))
+			draw_circle(Vector2(x + 10, y_suelo + 120), 15, Color(0.18, 0.15, 0.22))
+
+	# 4. CAPA DE HIERBA (Superficie verde pixelada)
+	# Dibujamos bloques de verde para simular césped irregular
+	var pixel_hierba = 16.0
+	for x in range(int(offset_x), int(offset_x + ancho_total), int(pixel_hierba)):
+		var altura_h = 24.0 if int(floor(float(x) / pixel_hierba)) % 2 == 0 else 16.00
+		# Sombra de la hierba
+		draw_rect(Rect2(x, y_suelo, pixel_hierba, altura_h + 4), Color(0.05, 0.3, 0.1))
+		# Hierba brillante
+		draw_rect(Rect2(x, y_suelo, pixel_hierba, altura_h), Color(0.1, 0.7, 0.2))
+		# Brillo extra en las puntas
+		draw_rect(Rect2(x, y_suelo, pixel_hierba, 6), Color(0.4, 0.9, 0.3))
