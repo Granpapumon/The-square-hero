@@ -2,16 +2,12 @@ extends CanvasLayer
 
 func _ready():
 	var jugador = get_tree().get_first_node_in_group("player")
-	# Estética de texto pixelado (Borde grueso)[cite: 4]
 	$TextoNivel.add_theme_color_override("font_outline_color", Color.BLACK)
 	$TextoNivel.add_theme_constant_override("outline_size", 12)
 	$MensajeHabilidad.add_theme_color_override("font_outline_color", Color.BLACK)
 	$MensajeHabilidad.add_theme_constant_override("outline_size", 12)
-	
-	# Estilo para la Barra de XP
 	$BarraXP.add_theme_stylebox_override("fill", _crear_estilo_barra(Color(0.2, 0.8, 0.4)))
 	$BarraXP.add_theme_stylebox_override("background", _crear_estilo_barra(Color(0.1, 0.1, 0.1)))
-
 	if jugador:
 		actualizar_xp(jugador.xp_actual, jugador.xp_necesaria)
 		actualizar_nivel(jugador.nivel)

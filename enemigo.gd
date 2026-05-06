@@ -7,7 +7,7 @@ var velocidad_base: float
 @export var dano_contacto = 10
 @export var probabilidad_gema: float = 1.0
 @export var xp_que_da: int = 1
-var expresion = "normal" # "normal", "dolor"
+var expresion = "normal"
 
 var congelado = false
 var envenenado = false
@@ -23,7 +23,6 @@ var pixel_art = []
 var color_base = Color(1, 1, 1)
 var color_sombra = Color(0, 0, 0)
 
-# Triángulo exacto de 15x24 (150x240px)
 var art_triangulo = [
 	".......B.......",
 	"......BEB......",
@@ -51,7 +50,6 @@ var art_triangulo = [
 	"BBBBBBBBBBBBBBB"
 ]
 
-# Rectángulo Vertical exacto de 15x24 (150x240px)
 var art_rectangulo = [
 	"BBBBBBBBBBBBBBB",
 	"BEEEEEEEEEEEEEB",
@@ -79,7 +77,6 @@ var art_rectangulo = [
 	"BBBBBBBBBBBBBBB"
 ]
 
-# Pentágono Base
 var art_pentagono = [
 	".......B.......",
 	"......BEB......",
@@ -97,7 +94,6 @@ var art_pentagono = [
 	"....BBBBBBB...."
 ]
 
-# Hexágono Base
 var art_hexagono = [
 	"....BBBBBBB....",
 	"...BEEEEEEEB...",
@@ -114,7 +110,6 @@ var art_hexagono = [
 	"....BBBBBBB...."
 ]
 
-# Octágono Base
 var art_octagono = [
 	".....BBBBB.....",
 	"...BBEEEEEBB...",
@@ -140,27 +135,26 @@ func _ready():
 	timer.one_shot = true
 	timer.timeout.connect(_on_timer_daño_timeout)
 	add_child(timer)
-	
 	var id_nodo = name.to_lower() + scene_file_path.to_lower()
 	if "rectangulo" in id_nodo:
 		pixel_art = art_rectangulo
-		color_base = Color(1.0, 0.5, 0.1) 
+		color_base = Color(1.0, 0.5, 0.1)
 		color_sombra = Color(0.8, 0.3, 0.0)
 	elif "pentagono" in id_nodo:
 		pixel_art = art_pentagono
-		color_base = Color(0.6, 0.2, 0.8) 
+		color_base = Color(0.6, 0.2, 0.8)
 		color_sombra = Color(0.3, 0.1, 0.5)
 	elif "hexagono" in id_nodo:
 		pixel_art = art_hexagono
-		color_base = Color(0.2, 0.4, 1.0) 
+		color_base = Color(0.2, 0.4, 1.0)
 		color_sombra = Color(0.1, 0.2, 0.8)
 	elif "heptagono" in id_nodo or "octagono" in id_nodo:
 		pixel_art = art_octagono
-		color_base = Color(0.8, 0.1, 0.2) 
+		color_base = Color(0.8, 0.1, 0.2)
 		color_sombra = Color(0.5, 0.0, 0.1)
-	else: 
+	else:
 		pixel_art = art_triangulo
-		color_base = Color(1.0, 0.9, 0.1) 
+		color_base = Color(1.0, 0.9, 0.1)
 		color_sombra = Color(0.8, 0.6, 0.0)
 
 func _physics_process(delta):
@@ -172,7 +166,6 @@ func _physics_process(delta):
 	else:
 		velocity.x = move_toward(velocity.x, 0, velocidad)
 	move_and_slide()
-
 	if puede_hacer_daño:
 		for area in $Hitbox.get_overlapping_areas():
 			if area.name == "Hurtbox" and area.get_parent().has_method("recibir_daño"):
@@ -187,7 +180,6 @@ func _on_timer_daño_timeout():
 func recibir_daño(cantidad):
 	salud -= cantidad
 	expresion = "dolor"
-	# Regresa a la normalidad tras un breve tiempo
 	get_tree().create_timer(0.4).timeout.connect(func(): expresion = "normal")
 	var flotante = dano_flotante_escena.instantiate()
 	get_parent().call_deferred("add_child", flotante)
@@ -229,20 +221,16 @@ func envenenar(dano_por_tick: int):
 	if not congelado: modulate = Color(1, 1, 1)
 
 func _process(_delta):
-	# Animación sutil de escala (respiración)
 	var pulso = 1.0 + (sin(Time.get_ticks_msec() * 0.005) * 0.05)
-	scale = Vector2(pulso, 1.0 / pulso) # Efecto muelle
+	scale = Vector2(pulso, 1.0 / pulso)
 	queue_redraw()
 
 func _draw():
-	# --- AJUSTADO A 10.0 PARA LOGRAR LAS MEDIDAS EXACTAS ---
 	var pixel_size = 10.0
-	var offset_x = - (pixel_art[0].length() * pixel_size) / 2.0
-	var offset_y = - (pixel_art.size() * pixel_size) / 2.0
-	
+	var offset_x = -(pixel_art[0].length() * pixel_size) / 2.0
+	var offset_y = -(pixel_art.size() * pixel_size) / 2.0
 	var direccion_espejo = -1 if velocity.x < 0 else 1
 	draw_set_transform(Vector2.ZERO, 0, Vector2(direccion_espejo, 1))
-	
 	for y in range(pixel_art.size()):
 		var row = pixel_art[y]
 		for x in range(row.length()):
@@ -251,8 +239,8 @@ func _draw():
 			var color = Color.TRANSPARENT
 			match letra:
 				"B": color = Color.BLACK
-				"C": color = Color.WHITE if expresion == "normal" else Color(1, 0.4, 0.4) 
-				"D": color = Color(0.8, 0.1, 0.1) if expresion == "normal" else Color.WHITE 
-				"E": color = color_base 
-				"M": color = color_sombra 
+				"C": color = Color.WHITE if expresion == "normal" else Color(1, 0.4, 0.4)
+				"D": color = Color(0.8, 0.1, 0.1) if expresion == "normal" else Color.WHITE
+				"E": color = color_base
+				"M": color = color_sombra
 			draw_rect(Rect2(offset_x + (x * pixel_size), offset_y + (y * pixel_size), pixel_size, pixel_size), color)

@@ -5,7 +5,7 @@ var velocidad_base: float
 @export var salud = 15
 @export var dano_contacto = 15
 @export var probabilidad_gema: float = 1.0
-@export var xp_que_da: int = 3 
+@export var xp_que_da: int = 3
 
 var congelado = false
 var envenenado = false
@@ -18,7 +18,6 @@ var player = null
 @onready var dano_flotante_escena = preload("res://dano_flotante.tscn")
 @onready var proyectil_escena = preload("res://proyectil_enemigo.tscn")
 
-# Estrella exacta de 18x18 (180x180px)
 var pixel_art = [
 	"........BB........",
 	".......BEEB.......",
@@ -59,7 +58,6 @@ func _physics_process(delta):
 	else:
 		velocity.x = move_toward(velocity.x, 0, velocidad)
 	move_and_slide()
-
 	if puede_hacer_daño:
 		for area in $Hitbox.get_overlapping_areas():
 			if area.name == "Hurtbox" and area.get_parent().has_method("recibir_daño"):
@@ -121,22 +119,18 @@ func envenenar(dano_por_tick: int):
 	if not congelado: modulate = Color(1, 1, 1)
 
 func _process(_delta):
-	# Animación sutil de escala (respiración)
 	var pulso = 1.0 + (sin(Time.get_ticks_msec() * 0.005) * 0.05)
-	scale = Vector2(pulso, 1.0 / pulso) # Efecto muelle
+	scale = Vector2(pulso, 1.0 / pulso)
 	queue_redraw()
 
 func _draw():
-	# --- AJUSTADO A 10.0 (18 x 10 = 180px) ---
-	var pixel_size = 10.0 
-	var offset_x = - (pixel_art[0].length() * pixel_size) / 2.0
-	var offset_y = - (pixel_art.size() * pixel_size) / 2.0
-# CALCULAR SI VA A DISPARAR PRONTO
+	var pixel_size = 10.0
+	var offset_x = -(pixel_art[0].length() * pixel_size) / 2.0
+	var offset_y = -(pixel_art.size() * pixel_size) / 2.0
 	var avisando_disparo = false
 	if is_instance_valid($TimerDisparo):
-		if $TimerDisparo.time_left < 0.5: # 0.5 segundos antes de disparar
+		if $TimerDisparo.time_left < 0.5:
 			avisando_disparo = true
-
 	for y in range(pixel_art.size()):
 		var row = pixel_art[y]
 		for x in range(row.length()):
@@ -145,12 +139,8 @@ func _draw():
 			var color = Color.TRANSPARENT
 			match letra:
 				"B": color = Color.BLACK
-				"C": 
-					# Brilla en blanco/azul si dispara
-					color = Color.WHITE if not avisando_disparo else Color(0.5, 0.8, 1.0)
-				"D": color = Color.BLACK 
-				"E": 
-					# Se vuelve roja si va a disparar
-					color = Color(1.0, 0.6, 0.0) if not avisando_disparo else Color(1.0, 0.2, 0.2)
+				"C": color = Color.WHITE if not avisando_disparo else Color(0.5, 0.8, 1.0)
+				"D": color = Color.BLACK
+				"E": color = Color(1.0, 0.6, 0.0) if not avisando_disparo else Color(1.0, 0.2, 0.2)
 				"M": color = Color(0.8, 0.3, 0.0) if not avisando_disparo else Color(0.5, 0, 0)
 			draw_rect(Rect2(offset_x + (x * pixel_size), offset_y + (y * pixel_size), pixel_size, pixel_size), color)
