@@ -30,7 +30,7 @@ func _obtener_escena_enemigo() -> PackedScene:
 func _on_spawner_timeout() -> void:
 	if not is_instance_valid(player) or jefe_activo:
 		return
-	if player.nivel >= 3 and not estrella_spawneada:
+	if player.nivel >= 5 and not estrella_spawneada:
 		estrella_spawneada = true
 		var estrella = escena_estrella.instantiate()
 		estrella.global_position = Vector2(player.global_position.x + 500, -50)

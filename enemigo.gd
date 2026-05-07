@@ -179,16 +179,41 @@ func _on_timer_daño_timeout():
 
 func recibir_daño(cantidad):
 	salud -= cantidad
-	expresion = "dolor"
-	get_tree().create_timer(0.4).timeout.connect(func(): expresion = "normal")
+	
+	# --- TU ANIMACIÓN DE IMPACTO ORIGINAL ---
+	modulate = Color(5, 5, 5) 
+	scale = Vector2(0.8, 1.2) 
+	
+	var tween = get_tree().create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(self, "modulate", Color(1, 1, 1), 0.15) 
+	tween.tween_property(self, "scale", Vector2(1, 1), 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	
 	var flotante = dano_flotante_escena.instantiate()
 	get_parent().call_deferred("add_child", flotante)
 	flotante.global_position = global_position + Vector2(0, -20)
 	flotante.iniciar(cantidad)
+	
+	# --- CORRECCIÓN DE MUERTE Y GEMAS ---
 	if salud <= 0:
-		var gema = gema_escena.instantiate()
-		get_parent().call_deferred("add_child", gema)
-		gema.global_position = global_position + Vector2(0, 20)
+		var explosion = EfectoExplosion.new()
+		# --- EXPLOSIÓN DE TRIÁNGULOS ---
+		explosion.iniciar("triangulo", Color(1.0, 0.4, 0.0)) # Color Naranja/Rojo
+		explosion.global_position = global_position
+		get_parent().add_child(explosion)
+		# --- EXPLOSIÓN DE ESTRELLITAS ---
+		explosion.iniciar("estrella", Color(1.0, 0.8, 0.0)) # Color Amarillo brillante
+		explosion.global_position = global_position
+		get_parent().add_child(explosion)
+		# --- EXPLOSIÓN ---
+		explosion.iniciar("rectangulo", color_base) # Usamos su color base
+		explosion.global_position = global_position
+		get_parent().add_child(explosion)
+		if randf() <= probabilidad_gema:
+			var gema = gema_escena.instantiate()
+			gema.valor_xp = xp_que_da
+			get_parent().call_deferred("add_child", gema)
+			gema.global_position = global_position + Vector2(0, 20)
 		queue_free()
 
 func congelar(tiempo: float):

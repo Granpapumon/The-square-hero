@@ -29,6 +29,19 @@ var saltos_restantes = 1
 const DASH_VELOCIDAD = 3000.0
 const DASH_DURACION = 0.05
 
+# --- ESCALADO DE HABILIDADES ---
+var dano_fuego = 2
+var escala_fuego = 1.0
+
+var tiempo_hielo = 2.0
+var escala_hielo = 1.0
+
+var ralentizacion_rayo = 0.60
+var escala_rayo = 1.0
+
+var dano_tick_veneno = 2
+var escala_veneno = 1.0
+
 # --- PERSONALIDAD Y EXPRESIONES ---
 var direccion_mirada = Vector2.RIGHT 
 var expresion_actual = "normal" 
@@ -384,24 +397,54 @@ func _on_weapon_timer_timeout():
 	if objetivo: _disparar(proyectil_escena, objetivo, dano_ataque)
 
 func _on_timer_fuego_timeout():
-	var objetivo = _obtener_objetivo()
-	if objetivo: _disparar(proyectil_fuego_escena, objetivo, 2)
+	var enemigo = _obtener_objetivo() # <--- CAMBIA ESTO POR TU FUNCIÓN ORIGINAL
+	if enemigo:
+		var bala = proyectil_fuego_escena.instantiate()
+		bala.global_position = global_position
+		
+		bala.dano = dano_fuego
+		bala.scale = Vector2(escala_fuego, escala_fuego)
+		
+		get_tree().current_scene.add_child(bala)
+		var direccion = (enemigo.global_position - global_position).normalized()
+		bala.lanzar(direccion)
 
 func _on_timer_hielo_timeout():
-	var objetivo = _obtener_objetivo()
-	if objetivo: _disparar(proyectil_hielo_escena, objetivo, 0)
+	var enemigo = _obtener_objetivo()
+	if enemigo:
+		var bala = proyectil_hielo_escena.instantiate()
+		bala.global_position = global_position
+		
+		bala.tiempo_congelacion = tiempo_hielo
+		bala.scale = Vector2(escala_hielo, escala_hielo)
+		
+		get_tree().current_scene.add_child(bala)
+		var direccion = (enemigo.global_position - global_position).normalized()
+		bala.lanzar(direccion)
 
 func _on_timer_rayo_timeout():
 	var objetivo = _obtener_objetivo()
 	if not objetivo: return
 	var rayo = proyectil_rayo_escena.instantiate()
+	# --- APLICAMOS EL ESCALADO DE NIVEL ---
+	rayo.porcentaje_ralentizacion = ralentizacion_rayo
+	rayo.scale = Vector2(escala_rayo, escala_rayo)
 	get_tree().current_scene.add_child(rayo)
 	rayo.global_position = Vector2(objetivo.global_position.x, objetivo.global_position.y - 300)
 	rayo.lanzar(Vector2.DOWN)
 
 func _on_timer_veneno_timeout():
-	var objetivo = _obtener_objetivo()
-	if objetivo: _disparar(proyectil_veneno_escena, objetivo, 0)
+	var enemigo = _obtener_objetivo()
+	if enemigo:
+		var bala = proyectil_veneno_escena.instantiate()
+		bala.global_position = global_position
+		
+		bala.dano_veneno = dano_tick_veneno
+		bala.scale = Vector2(escala_veneno, escala_veneno)
+		
+		get_tree().current_scene.add_child(bala)
+		var direccion = (enemigo.global_position - global_position).normalized()
+		bala.lanzar(direccion)
 
 func ganar_xp(cantidad):
 	xp_actual += cantidad
@@ -413,30 +456,65 @@ func ganar_xp(cantidad):
 func subir_nivel():
 	nivel += 1
 	xp_actual = 0
-	xp_necesaria += 2
-	
-	cambiar_expresion("poder", 2.0)
+	xp_necesaria = int(xp_necesaria * 1.4) + 2
 	
 	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:
 		hud.actualizar_xp(0, xp_necesaria)
 		hud.actualizar_nivel(nivel)
+
+	# NIVEL 10: JEFE PENTÁGONO
 	if nivel == 10:
 		var mundo = get_tree().get_first_node_in_group("mundo")
-		if mundo: mundo.spawner_jefe_pentagono()
+		if mundo:
+			mundo.call_deferred("spawner_jefe_pentagono")
 		return
-		
-	get_tree().paused = true
+
+	# NIVEL 25: FUSIÓN DE HABILIDADES
+	if nivel == 25:
+		if hud:
+			hud.mostrar_mensaje("¡FUSIÓN DE HABILIDADES DISPONIBLE!")
+		# Aquí no abrimos el menú normal, ya que es un nivel especial
+		return
+
+	# Definimos los arreglos de niveles
+	var niveles_habilidad_1 = [7, 9, 11, 13]
+	var niveles_habilidad_2 = [17, 19, 21, 23]
+	var niveles_sin_atributos = [5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25]
+
+	# --- SUBIDA AUTOMÁTICA DE HABILIDADES ---
+	if nivel in niveles_habilidad_1 and habilidad_1 != "":
+		nivel_habilidad_1 += 1
+		_aplicar_escalado_habilidad(habilidad_1, nivel_habilidad_1)
+		if hud:
+			hud.mostrar_mensaje(habilidad_1.to_upper() + " SUBIÓ A NIVEL " + str(nivel_habilidad_1) + "!")
+
+	if nivel in niveles_habilidad_2 and habilidad_2 != "":
+		nivel_habilidad_2 += 1
+		_aplicar_escalado_habilidad(habilidad_2, nivel_habilidad_2)
+		if hud:
+			hud.mostrar_mensaje(habilidad_2.to_upper() + " SUBIÓ A NIVEL " + str(nivel_habilidad_2) + "!")
+
+# --- CONTROL DEL MENÚ DE NIVEL ---
 	var menu = get_tree().get_first_node_in_group("menu_nivel")
-	if menu:
-		menu.get_parent().show() # Mostramos el CanvasLayer (el padre)
-		menu.configurar_modo_atributos() # Llamamos a la función en el Contenedor
+	if not menu: return
+
 	if nivel == 5 or nivel == 15:
+		# Elección de Habilidad Nueva
+		get_tree().paused = true
 		if hud: hud.mostrar_mensaje("¡Nueva habilidad desbloqueada!")
 		menu.configurar_modo_habilidades()
+		menu.get_parent().show() # <--- ESTO FUERZA AL CANVASLAYER A MOSTRARSE
+		menu.show()
+	elif nivel in niveles_sin_atributos:
+		# Niveles mágicos: no se pausa ni se muestra menú
+		pass 
 	else:
+		# Niveles de atributos (2, 3, 4, 6...)
+		get_tree().paused = true
 		menu.configurar_modo_atributos()
-	menu.show()
+		menu.get_parent().show() # <--- ESTO FUERZA AL CANVASLAYER A MOSTRARSE
+		menu.show()
 
 func desbloquear_habilidad(nombre: String):
 	if habilidad_1 == "":
@@ -478,3 +556,52 @@ func crear_fantasma_dash():
 	var p_perks = get_tree().get_first_node_in_group("pantalla_perks")
 	if p_perks:
 		p_perks.show()
+
+# --- MEJORAS DE ATRIBUTOS (Llamadas desde el Menú) ---
+
+func mejora_ataque():
+	dano_ataque += 1
+	# Opcional: Imprime en la consola de Godot para que confirmes que funciona
+	print("Nuevo ataque: ", dano_ataque)
+
+func mejora_salto():
+	# En Godot, el eje Y hacia arriba es negativo. Restar lo hace saltar más alto.
+	fuerza_salto -= 50.0 
+	print("Nuevo salto: ", fuerza_salto)
+
+func mejora_velocidad():
+	velocidad_actual += 30.0
+	print("Nueva velocidad: ", velocidad_actual)
+
+func mejora_cadencia():
+	# Restamos tiempo al temporizador de disparo para que dispare más rápido
+	tiempo_disparo -= 0.042
+	
+	# Ponemos un límite de seguridad para que el juego no colapse disparando a 0 segundos
+	if tiempo_disparo < 0.2:
+		tiempo_disparo = 0.2
+		
+	print("Nueva cadencia: ", tiempo_disparo)
+
+func _aplicar_escalado_habilidad(nombre_hab: String, nuevo_nivel: int):
+	match nombre_hab:
+		"fuego":
+			if nuevo_nivel == 2:   dano_fuego += 2      # Ajusta este valor
+			elif nuevo_nivel == 3: dano_fuego += 2      # Ajusta este valor
+			elif nuevo_nivel == 4: dano_fuego += 2      # Ajusta este valor
+			elif nuevo_nivel == 5: dano_fuego += 2      # Ajusta este valor
+		"hielo":
+			if nuevo_nivel == 2:   tiempo_hielo += 0.5  # Ajusta este valor
+			elif nuevo_nivel == 3: tiempo_hielo += 0.5  # Ajusta este valor
+			elif nuevo_nivel == 4: tiempo_hielo += 0.5  # Ajusta este valor
+			elif nuevo_nivel == 5: tiempo_hielo += 0.5  # Ajusta este valor
+		"rayo":
+			if nuevo_nivel == 2:   ralentizacion_rayo += 0.2 # Ajusta este valor
+			elif nuevo_nivel == 3: ralentizacion_rayo += 0.2 # Ajusta este valor
+			elif nuevo_nivel == 4: ralentizacion_rayo += 0.2 # Ajusta este valor
+			elif nuevo_nivel == 5: ralentizacion_rayo += 0.2 # Ajusta este valor
+		"veneno":
+			if nuevo_nivel == 2:   dano_tick_veneno += 2 # Ajusta este valor
+			elif nuevo_nivel == 3: dano_tick_veneno += 2 # Ajusta este valor
+			elif nuevo_nivel == 4: dano_tick_veneno += 2 # Ajusta este valor
+			elif nuevo_nivel == 5: dano_tick_veneno += 2 # Ajusta este valor

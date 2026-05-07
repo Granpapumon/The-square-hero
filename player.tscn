@@ -40,6 +40,7 @@ autostart = true
 [node name="Camera2D" type="Camera2D" parent="." unique_id=2051481111]
 position = Vector2(-4, 0)
 zoom = Vector2(0.5, 0.5)
+limit_smoothed = true
 
 [node name="ContadorEnemigos" type="Label" parent="Camera2D" unique_id=1218999041]
 modulate = Color(0.078431375, 1, 1, 1)

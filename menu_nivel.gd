@@ -1,59 +1,52 @@
 extends Control
 
-func _ready():
-	get_parent().visibility_changed.connect(_on_parent_visibility_changed)
-	_estilizar_interfaz(self)
-
-func _on_parent_visibility_changed():
-	get_tree().paused = get_parent().visible
-	if get_parent().visible:
-		queue_redraw()
-
-func _estilizar_interfaz(n):
-	if n is Button:
-		n.flat = true
-		n.add_theme_color_override("font_outline_color", Color.BLACK)
-		n.add_theme_constant_override("outline_size", 14)
-		n.process_mode = Node.PROCESS_MODE_ALWAYS
-	for hijo in n.get_children():
-		_estilizar_interfaz(hijo)
-
-func _draw():
-	if not get_parent().visible: return
-	var tam_panel = Vector2(650, 800)
-	var centro = size / 2
-	var r = Rect2(centro - tam_panel / 2, tam_panel)
-	draw_rect(r.grow(12), Color.BLACK)
-	draw_rect(r, Color(0.15, 0.15, 0.2))
-	draw_rect(Rect2(r.position.x, r.position.y, r.size.x, 12), Color(1, 1, 1, 0.15))
-
 func configurar_modo_habilidades():
-	_limpiar_botones()
-	_mostrar_grupo(["FUEGO", "HIELO", "RAYO", "VENENO"])
+	# Pasamos por ColorRect -> VBoxContainer para ocultar atributos
+	$ColorRect/VBoxContainer/ATAQUE.hide()
+	$ColorRect/VBoxContainer/SALTO.hide()
+	$ColorRect/VBoxContainer/VELOCIDAD.hide()
+	$ColorRect/VBoxContainer/CADENCIA.hide()
+	
+	# Pasamos por ColorRect -> VBoxContainer para mostrar magias
+	$ColorRect/VBoxContainer/FUEGO.show()
+	$ColorRect/VBoxContainer/HIELO.show()
+	$ColorRect/VBoxContainer/RAYO.show()
+	$ColorRect/VBoxContainer/VENENO.show()
 
 func configurar_modo_atributos():
-	_limpiar_botones()
-	_mostrar_grupo(["ATAQUE", "SALTO", "VELOCIDAD", "CADENCIA"])
-
-func _limpiar_botones():
-	var v_box = $ColorRect/VBoxContainer
-	for boton in v_box.get_children():
-		boton.hide()
-
-func _mostrar_grupo(nombres: Array):
-	var v_box = $ColorRect/VBoxContainer
-	for nombre in nombres:
-		var n = v_box.get_node_or_null(nombre)
-		if n: n.show()
+	# Pasamos por ColorRect -> VBoxContainer para mostrar atributos
+	$ColorRect/VBoxContainer/ATAQUE.show()
+	$ColorRect/VBoxContainer/SALTO.show()
+	$ColorRect/VBoxContainer/VELOCIDAD.show()
+	$ColorRect/VBoxContainer/CADENCIA.show()
+	
+	# Pasamos por ColorRect -> VBoxContainer para ocultar magias
+	$ColorRect/VBoxContainer/FUEGO.hide()
+	$ColorRect/VBoxContainer/HIELO.hide()
+	$ColorRect/VBoxContainer/RAYO.hide()
+	$ColorRect/VBoxContainer/VENENO.hide()
 
 func _aplicar_mejora(nombre_funcion: String):
 	var jugador = get_tree().get_first_node_in_group("player")
 	if jugador and jugador.has_method(nombre_funcion):
 		jugador.call(nombre_funcion)
 	get_tree().paused = false
-	get_parent().hide()
+	get_parent().hide() # Oculta el MenuNivel entero (el CanvasLayer)
 
-func _on_ataque_pressed():    _aplicar_mejora("mejorar_ataque")
-func _on_salto_pressed():     _aplicar_mejora("mejorar_salto")
-func _on_velocidad_pressed(): _aplicar_mejora("mejorar_velocidad")
-func _on_cadencia_pressed():  _aplicar_mejora("mejorar_cadencia")
+func _aplicar_habilidad(nombre: String):
+	var jugador = get_tree().get_first_node_in_group("player")
+	if jugador:
+		jugador.desbloquear_habilidad(nombre)
+	get_tree().paused = false
+	get_parent().hide() # Oculta el MenuNivel entero (el CanvasLayer)
+
+# --- TUS SEÑALES ORIGINALES ---
+func _on_ataque_pressed():    _aplicar_mejora("mejora_ataque")
+func _on_salto_pressed():     _aplicar_mejora("mejora_salto")
+func _on_velocidad_pressed(): _aplicar_mejora("mejora_velocidad")
+func _on_cadencia_pressed():  _aplicar_mejora("mejora_cadencia")
+
+func _on_fuego_pressed():     _aplicar_habilidad("fuego")
+func _on_hielo_pressed():     _aplicar_habilidad("hielo")
+func _on_rayo_pressed():      _aplicar_habilidad("rayo")
+func _on_veneno_pressed():    _aplicar_habilidad("veneno")
