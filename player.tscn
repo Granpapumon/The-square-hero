@@ -3,6 +3,20 @@
 [ext_resource type="Script" uid="uid://cdogg2g4ekcib" path="res://Player.gd" id="1_onrkg"]
 [ext_resource type="Texture2D" uid="uid://rmav1krs4edp" path="res://icon.svg" id="2_i3pqv"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onrkg"]
+bg_color = Color(0.41568628, 0.0627451, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i3pqv"]
+bg_color = Color(0, 0.99607843, 0, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hqtel"]
 size = Vector2(125, 125)
 
@@ -20,10 +34,19 @@ initial_velocity_max = 150.0
 gravity = Vector3(0, 500, 0)
 scale_max = 4.0
 
-[node name="Player" type="CharacterBody2D" unique_id=420681925 groups=["player"]]
+[node name="Player" type="CharacterBody2D" unique_id=420681925 groups=["jugador", "player"]]
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("1_onrkg")
+
+[node name="ProgressBar" type="ProgressBar" parent="." unique_id=1671633400]
+offset_left = -63.0
+offset_top = -100.0
+offset_right = 64.0
+offset_bottom = -79.0
+theme_override_styles/background = SubResource("StyleBoxFlat_onrkg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_i3pqv")
+show_percentage = false
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=54185948]
 visible = false

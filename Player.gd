@@ -46,7 +46,7 @@ var escala_veneno = 1.0
 var direccion_mirada = Vector2.RIGHT 
 var expresion_actual = "normal" 
 var id_expresion = 0 
-
+var esta_muerto = false
 # --- SISTEMA VISUAL (NUEVO) ---
 var particulas_correr: CPUParticles2D # Nube de polvo continua tipo Sonic
 
@@ -56,10 +56,20 @@ var particulas_correr: CPUParticles2D # Nube de polvo continua tipo Sonic
 @onready var proyectil_hielo_escena  = preload("res://proyectil_hielo.tscn")
 @onready var proyectil_rayo_escena   = preload("res://proyectil_rayo.tscn")
 @onready var proyectil_veneno_escena = preload("res://proyectil_veneno.tscn")
+@onready var barra_salud = $ProgressBar # Asegúrate de que la ruta sea correcta
+var salud_maxima = 100
+
+func actualizar_salud(nueva_salud):
+	salud = nueva_salud
+	# Animación fluida de la barra de vida
+	var tween = create_tween()
+	tween.tween_property(barra_salud, "value", salud, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
 func _ready():
 	if has_node("Sprite2D"):
 		$Sprite2D.show_behind_parent = true
+		barra_salud.max_value = salud
+		barra_salud.value = salud
 		
 	# --- INICIALIZAMOS EL POLVO CONTINUO DE CORRER ---
 	particulas_correr = CPUParticles2D.new()
@@ -112,8 +122,10 @@ func cambiar_expresion(nueva_expresion: String, duracion: float):
 
 # --- VIDA ---
 func recibir_daño(cantidad):
-	if invulnerable: return 
-		
+	if invulnerable or dasheando or esta_muerto: return
+	# --- ACTUALIZACIÓN DE LA BARRA DE VIDA ---
+	var barra_tween = get_tree().create_tween()
+	barra_tween.tween_property(barra_salud, "value", salud, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	salud -= cantidad
 	print("DAÑO RECIBIDO: ", cantidad, " - Salud restante: ", salud)
 	
@@ -127,7 +139,19 @@ func recibir_daño(cantidad):
 	tween.tween_property($Sprite2D, "modulate", Color(1, 1, 1), 0.3)
 	tween.tween_property($Sprite2D, "scale", Vector2(1, 1), 0.4).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	
-	if salud <= 0: morir()
+	if salud <= 0:
+		_ejecutar_animacion_ko()
+	else:
+		# --- ANIMACIÓN DE DAÑO NORMAL (Hit Flash) ---
+		var material_enemigo = $Sprite2D.material
+		if material_enemigo:
+			material_enemigo.set_shader_parameter("flash_modifier", 1.0)
+		
+		scale = Vector2(0.8, 1.2) 
+		var _tween_muerto = get_tree().create_tween().set_parallel(true)
+		if material_enemigo:
+			tween.tween_property(material_enemigo, "shader_parameter/flash_modifier", 0.0, 0.15)
+		tween.tween_property(self, "scale", Vector2(1, 1), 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 
 func morir():
 	get_tree().reload_current_scene()
@@ -541,16 +565,20 @@ func mejorar_cadencia():
 	$WeaponTimer.wait_time = tiempo_disparo
 
 func crear_fantasma_dash():
-	# 1. Creamos un sprite temporal para el efecto
 	var fantasma = Sprite2D.new()
-	fantasma.texture = $Sprite2D.texture # Usamos la textura actual del player
-	fantasma.global_position = global_position
-	fantasma.modulate = Color(0.5, 0.5, 1.0, 0.6) # Color azulado semi-transparente
-	# 2. Lo añadimos al mundo (no al player, para que se quede atrás)
-	get_parent().add_child(fantasma)
-	# 3. Lo desvanecemos y eliminamos automáticamente
-	var tween = create_tween()
-	tween.tween_property(fantasma, "modulate:a", 0.0, 0.4)
+	# Copiamos exactamente cómo se ve tu jugador en este instante
+	fantasma.texture = $Sprite2D.texture
+	fantasma.global_position = $Sprite2D.global_position
+	fantasma.rotation = $Sprite2D.rotation
+	fantasma.scale = $Sprite2D.scale
+	# Lo teñimos de un color llamativo (ej. Cian brillante)
+	fantasma.modulate = Color(0.0, 1.0, 1.0, 0.6) 
+	# Lo añadimos al mundo (para que se quede atrás y no siga al jugador)
+	get_tree().current_scene.add_child(fantasma)
+	# Animación: Se encoge y desaparece rápido
+	var tween = get_tree().create_tween()
+	tween.tween_property(fantasma, "scale", Vector2.ZERO, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(fantasma, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(fantasma.queue_free)
 # Cuando el jugador deba elegir un Perk:
 	var p_perks = get_tree().get_first_node_in_group("pantalla_perks")
@@ -605,3 +633,39 @@ func _aplicar_escalado_habilidad(nombre_hab: String, nuevo_nivel: int):
 			elif nuevo_nivel == 3: dano_tick_veneno += 2 # Ajusta este valor
 			elif nuevo_nivel == 4: dano_tick_veneno += 2 # Ajusta este valor
 			elif nuevo_nivel == 5: dano_tick_veneno += 2 # Ajusta este valor
+
+func _ejecutar_animacion_ko():
+	esta_muerto = true
+	set_physics_process(false) # Desactiva tus controles y la gravedad normal
+	
+	# Desactivamos la colisión para que los enemigos pasen de largo
+	if has_node("CollisionShape2D"):
+		$CollisionShape2D.set_deferred("disabled", true)
+		
+	# 1. CÁMARA LENTA DRAMÁTICA (El toque Street Fighter)
+	Engine.time_scale = 0.3
+	
+	# 2. EL VUELO HACIA ATRÁS
+	var tween = create_tween().set_parallel(true)
+	
+	# Determinamos hacia dónde miraba para lanzarlo al lado contrario
+	var direccion_vuelo = -1 if velocity.x > 0 else 1
+	if velocity.x == 0: direccion_vuelo = [-1, 1].pick_random() # Si estaba quieto, lado aleatorio
+	
+	# Efecto de giro violento
+	tween.tween_property($Sprite2D, "rotation", rotation + (PI * 6 * direccion_vuelo), 1.0)
+	
+	# Vuelo parabólico (Primero sube...)
+	tween.tween_property(self, "position:y", position.y - 200, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# (...luego cae en picada)
+	tween.chain().tween_property(self, "position:y", position.y + 600, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	
+	# Se desplaza horizontalmente mientras sube y cae
+	tween.parallel().tween_property(self, "position:x", position.x + (300 * direccion_vuelo), 1.0)
+	
+	# 3. RESTAURAR Y REINICIAR (Cuando termina de caer)
+	tween.chain().tween_callback(reiniciar_nivel_tras_muerte)
+
+func reiniciar_nivel_tras_muerte():
+	Engine.time_scale = 1.0 # ¡CRÍTICO! Devolver el tiempo a la normalidad
+	get_tree().reload_current_scene() # O cambiar a tu pantalla de Game Over
