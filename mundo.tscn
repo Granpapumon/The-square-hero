@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://ck6n7sx4uy548" path="res://player.tscn" id="2_fw4w5"]
 [ext_resource type="PackedScene" uid="uid://diumjd1riheh3" path="res://enemigo.tscn" id="4_otwa2"]
 [ext_resource type="PackedScene" uid="uid://cld022tfitfbs" path="res://pantalla_perks.tscn" id="7_2hh7m"]
+[ext_resource type="Script" uid="uid://cucvk50a5rw3x" path="res://gestor_pausa.gd" id="8_t8jxu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_otwa2"]
 size = Vector2(3200, 133)
@@ -48,5 +49,9 @@ position = Vector2(1181, -123)
 [node name="Label" type="Label" parent="." unique_id=845827045]
 offset_right = 40.0
 offset_bottom = 23.0
+
+[node name="GestorPausa" type="CanvasLayer" parent="." unique_id=1662274247]
+process_mode = 3
+script = ExtResource("8_t8jxu")
 
 [connection signal="timeout" from="Spawner" to="." method="_on_spawner_timeout"]
