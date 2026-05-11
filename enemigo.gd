@@ -9,6 +9,11 @@ var velocidad_base: float
 @export var xp_que_da: int = 1
 var expresion = "normal"
 
+# --- SISTEMA DE SALTO AUTOMÁTICO ---
+var raycast_vacio: RayCast2D
+var saltando_vacio = false
+var fuerza_salto = -750.0 # Qué tan fuerte saltan los enemigos
+
 var congelado = false
 var envenenado = false
 var puede_hacer_daño = true
@@ -156,13 +161,34 @@ func _ready():
 		pixel_art = art_triangulo
 		color_base = Color(1.0, 0.9, 0.1)
 		color_sombra = Color(0.8, 0.6, 0.0)
+		# --- SENSOR DE VACÍO (Generado por código) ---
+	raycast_vacio = RayCast2D.new()
+	raycast_vacio.target_position = Vector2(0, 150) # Apunta 150 píxeles hacia abajo
+	add_child(raycast_vacio)
 
 func _physics_process(delta):
 	if congelado: return
-	if not is_on_floor(): velocity.y += gravedad * delta
+	if not is_on_floor(): 
+		velocity.y += gravedad * delta
+	else:
+		saltando_vacio = false
 	if player:
 		var direccion = global_position.direction_to(player.global_position)
-		velocity.x = velocidad if direccion.x > 0 else -velocidad
+		
+		# Empujón en el aire si está saltando
+		if saltando_vacio:
+			velocity.x = (velocidad * 2.5) * (1 if direccion.x > 0 else -1)
+		else:
+			velocity.x = velocidad if direccion.x > 0 else -velocidad
+			
+		# Añadido: Escáner de vacío para saltar
+		if is_on_floor() and velocity.x != 0:
+			raycast_vacio.position = Vector2(sign(velocity.x) * 90, 0)
+			raycast_vacio.force_raycast_update()
+			
+			if not raycast_vacio.is_colliding() and player.global_position.y <= global_position.y + 150:
+				velocity.y = fuerza_salto
+				saltando_vacio = true
 	else:
 		velocity.x = move_toward(velocity.x, 0, velocidad)
 	move_and_slide()

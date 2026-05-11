@@ -16,6 +16,8 @@ size = Vector2(180, 180)
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_47q0o")
+velocidad = 200.0
+salud = 30
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1484610955]
 visible = false

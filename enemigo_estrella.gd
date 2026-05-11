@@ -11,6 +11,11 @@ var congelado = false
 var envenenado = false
 var puede_hacer_daño = true
 
+# --- SISTEMA DE SALTO AUTOMÁTICO ---
+var raycast_vacio: RayCast2D
+var saltando_vacio = false
+var fuerza_salto = -750.0
+
 var gravedad = ProjectSettings.get_setting("physics/2d/default_gravity")
 var player = null
 
@@ -48,16 +53,40 @@ func _ready():
 	timer_daño.one_shot = true
 	timer_daño.timeout.connect(_on_timer_daño_timeout)
 	add_child(timer_daño)
+	
+	# --- SENSOR DE VACÍO ---
+	raycast_vacio = RayCast2D.new()
+	raycast_vacio.target_position = Vector2(0, 150)
+	add_child(raycast_vacio)
 
 func _physics_process(delta):
 	if congelado: return
-	if not is_on_floor(): velocity.y += gravedad * delta
+	
+	if not is_on_floor(): 
+		velocity.y += gravedad * delta
+	else:
+		saltando_vacio = false
+		
 	if player:
 		var direccion = global_position.direction_to(player.global_position)
-		velocity.x = velocidad if direccion.x > 0 else -velocidad
+		
+		if saltando_vacio:
+			velocity.x = (velocidad * 2.5) * (1 if direccion.x > 0 else -1)
+		else:
+			velocity.x = velocidad if direccion.x > 0 else -velocidad
+			
+		if is_on_floor() and velocity.x != 0:
+			raycast_vacio.position = Vector2(sign(velocity.x) * 90, 0)
+			raycast_vacio.force_raycast_update()
+			
+			if not raycast_vacio.is_colliding() and player.global_position.y <= global_position.y + 150:
+				velocity.y = fuerza_salto
+				saltando_vacio = true
 	else:
 		velocity.x = move_toward(velocity.x, 0, velocidad)
+		
 	move_and_slide()
+	
 	if puede_hacer_daño:
 		for area in $Hitbox.get_overlapping_areas():
 			if area.name == "Hurtbox" and area.get_parent().has_method("recibir_daño"):

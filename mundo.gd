@@ -14,6 +14,8 @@ extends Node2D
 const MAX_ENEMIGOS = 25
 var jefe_activo = false
 var estrella_spawneada = false
+var ultimo_nivel_visto = 0
+var estrellas_creadas_en_este_nivel = 0
 
 func _ready():
 	add_to_group("mundo")
@@ -30,27 +32,38 @@ func _obtener_escena_enemigo() -> PackedScene:
 func _on_spawner_timeout() -> void:
 	if not is_instance_valid(player) or jefe_activo:
 		return
-	if player.nivel >= 5 and not estrella_spawneada:
-		estrella_spawneada = true
-		var estrella = escena_estrella.instantiate()
-		estrella.global_position = Vector2(player.global_position.x + 500, -50)
-		add_child(estrella)
-		var hud = get_tree().get_first_node_in_group("HUD")
-		if hud:
-			hud.mostrar_mensaje("⚠ ¡Enemigo especial!")
+
+	# --- RESETEAR CONTADOR AL SUBIR DE NIVEL ---
+	if player.nivel != ultimo_nivel_visto:
+		ultimo_nivel_visto = player.nivel
+		estrellas_creadas_en_este_nivel = 0
+
+	# --- CONTROL DE ELITES (Niveles 4 y 6 | Máximo 2 por nivel) ---
+	var niveles_estrella = [4, 6]
+	
+	if player.nivel in niveles_estrella:
+		# Solo permitimos spawnear si llevamos menos de 2 en este nivel
+		if estrellas_creadas_en_este_nivel < 2:
+			# Mantenemos el límite de 1 a la vez en pantalla para que no salgan juntas
+			if get_tree().get_nodes_in_group("elites").size() < 1:
+				var estrella = escena_estrella.instantiate()
+				estrella.add_to_group("elites")
+				estrella.global_position = $GeneradorSuelo.obtener_posicion_segura(player.global_position.x)
+				add_child(estrella)
+				
+				# ¡Importante! Sumamos al contador
+				estrellas_creadas_en_este_nivel += 1
+				
+				var hud = get_tree().get_first_node_in_group("HUD")
+				if hud:
+					hud.mostrar_mensaje("⚠ ¡ALERTA: ENEMIGO ÉLITE (" + str(estrellas_creadas_en_este_nivel) + "/2)!")
+
+	# --- RESTO DEL SPAWN (Enemigos normales) ---
 	if get_tree().get_nodes_in_group("enemigos").size() >= MAX_ENEMIGOS:
 		return
+		
 	var nuevo_enemigo = _obtener_escena_enemigo().instantiate()
-	var x_min = -1200
-	var x_max = 1200
-	var radio_seguro = 400
-	var x_al_azar = 0.0
-	var posicion_valida = false
-	while not posicion_valida:
-		x_al_azar = randf_range(x_min, x_max)
-		if abs(x_al_azar - player.global_position.x) > radio_seguro:
-			posicion_valida = true
-	nuevo_enemigo.global_position = Vector2(x_al_azar, -50)
+	nuevo_enemigo.global_position = $GeneradorSuelo.obtener_posicion_segura(player.global_position.x)
 	add_child(nuevo_enemigo)
 
 func spawner_jefe_pentagono():
@@ -58,7 +71,7 @@ func spawner_jefe_pentagono():
 	for e in get_tree().get_nodes_in_group("enemigos"):
 		e.queue_free()
 	var jefe = escena_jefe_pentagono.instantiate()
-	jefe.global_position = Vector2(player.global_position.x + 400, -50)
+	jefe.global_position = $GeneradorSuelo.obtener_posicion_segura(player.global_position.x)
 	add_child(jefe)
 	var hud = get_tree().get_first_node_in_group("HUD")
 	if hud:

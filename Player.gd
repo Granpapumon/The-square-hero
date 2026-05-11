@@ -604,12 +604,17 @@ func mejora_velocidad():
 func mejora_cadencia():
 	# Restamos tiempo al temporizador de disparo para que dispare más rápido
 	tiempo_disparo -= 0.042
-	
-	# Ponemos un límite de seguridad para que el juego no colapse disparando a 0 segundos
-	if tiempo_disparo < 0.2:
+	# Ponemos un límite de seguridad para que el juego no colapse
+	if tiempo_disparo < 0.2: 
 		tiempo_disparo = 0.2
+	# ---> LA MAGIA DE LA SEPARACIÓN <---
+	# Forzamos a que SOLO el timer del ataque básico lea esta nueva velocidad.
+	# Asegúrate de que el nombre entre comillas ("WeaponTimer") sea el nombre real 
+	# del nodo de tu timer de disparo normal en tu árbol de nodos.
+	if has_node("WeaponTimer"):
+		$WeaponTimer.wait_time = tiempo_disparo
 		
-	print("Nueva cadencia: ", tiempo_disparo)
+	print("Nueva cadencia del arma base: ", tiempo_disparo)
 
 func _aplicar_escalado_habilidad(nombre_hab: String, nuevo_nivel: int):
 	match nombre_hab:

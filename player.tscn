@@ -40,6 +40,7 @@ collision_mask = 5
 script = ExtResource("1_onrkg")
 
 [node name="ProgressBar" type="ProgressBar" parent="." unique_id=1671633400]
+custom_minimum_size = Vector2(125, 20)
 offset_left = -63.0
 offset_top = -100.0
 offset_right = 64.0

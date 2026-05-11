@@ -7,10 +7,26 @@
 [ext_resource type="PackedScene" uid="uid://ck6n7sx4uy548" path="res://player.tscn" id="2_fw4w5"]
 [ext_resource type="PackedScene" uid="uid://diumjd1riheh3" path="res://enemigo.tscn" id="4_otwa2"]
 [ext_resource type="PackedScene" uid="uid://cld022tfitfbs" path="res://pantalla_perks.tscn" id="7_2hh7m"]
-[ext_resource type="Script" uid="uid://cucvk50a5rw3x" path="res://gestor_pausa.gd" id="8_t8jxu"]
+[ext_resource type="Script" uid="uid://4h10iujplfk6" path="res://generador_suelo.gd" id="8_t8jxu"]
+[ext_resource type="Script" uid="uid://dqp41yhcqv6ng" path="res://plataforma_base.gd" id="9_pfhxm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_otwa2"]
 size = Vector2(3200, 133)
+
+[sub_resource type="PackedScene" id="PackedScene_pij3u"]
+_bundled = {
+"conn_count": 0,
+"conns": PackedInt32Array(),
+"editable_instances": [],
+"id_paths": [PackedInt32Array(), PackedInt32Array()],
+"names": PackedStringArray("PlataformaBase", "StaticBody2D", "script", "CollisionShape2D", "CollisionShape2D", "ColorRect", "ColorRect", "offset_right", "offset_bottom"),
+"node_count": 3,
+"node_ids": PackedInt32Array(12095503, 1197501143, 912366452),
+"node_paths": [NodePath("."), NodePath(".")],
+"nodes": PackedInt32Array(-1, -1, 1, 0, -1, 1, 2, 0, 0, 1073741824, 0, 4, 3, -1, 0, 0, 1073741825, 0, 6, 5, -1, 2, 7, 1, 8, 2, 0),
+"variants": [ExtResource("9_pfhxm"), 40.0, 40.0],
+"version": 3
+}
 
 [node name="Mundo" type="Node2D" unique_id=2083137370 groups=["mundo"]]
 script = ExtResource("1_fw4w5")
@@ -27,7 +43,6 @@ position = Vector2(0, -1)
 collision_mask = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="suelo" unique_id=1555740171]
-visible = false
 position = Vector2(20.499939, 138)
 scale = Vector2(24.47656, 1)
 texture = ExtResource("1_lgngo")
@@ -50,8 +65,8 @@ position = Vector2(1181, -123)
 offset_right = 40.0
 offset_bottom = 23.0
 
-[node name="GestorPausa" type="CanvasLayer" parent="." unique_id=1662274247]
-process_mode = 3
+[node name="GeneradorSuelo" type="Node2D" parent="." unique_id=2133439674]
 script = ExtResource("8_t8jxu")
+plataforma_escena = SubResource("PackedScene_pij3u")
 
 [connection signal="timeout" from="Spawner" to="." method="_on_spawner_timeout"]
