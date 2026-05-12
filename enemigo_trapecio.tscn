@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://bde08mjhncdwf"]
+
+[ext_resource type="Script" uid="uid://cw556grloicc6" path="res://enemigo_trapecio.gd" id="1_cv0wx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hhfk4"]
+size = Vector2(180, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1owsj"]
+size = Vector2(180, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y4c7e"]
+size = Vector2(180, 180)
+
+[node name="enemigo_trapecio" type="CharacterBody2D" unique_id=1565645344]
+script = ExtResource("1_cv0wx")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1577503076]
+shape = SubResource("RectangleShape2D_hhfk4")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=145581462]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=440648081]
+shape = SubResource("RectangleShape2D_1owsj")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=1291214779]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=574687617]
+shape = SubResource("RectangleShape2D_y4c7e")
+
+[node name="TimerDisparo" type="Timer" parent="." unique_id=25246762]
+wait_time = 3.0
+autostart = true
+
+[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

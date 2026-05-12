@@ -1,46 +1,30 @@
 [gd_scene format=3 uid="uid://h7wxwpaalsl3"]
 
-[ext_resource type="Script" uid="uid://b07a4aydpeaw7" path="res://enemigo.gd" id="1_80hcr"]
+[ext_resource type="Script" uid="uid://kq86s32lca7t" path="res://jefe_heptagono.gd" id="1_80hcr"]
 
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_becj5"]
-size = Vector2(125, 240)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_80hcr"]
+size = Vector2(300, 300)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_becj5"]
-size = Vector2(125, 240)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e6wv3"]
+size = Vector2(300, 300)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_a5tj2"]
-size = Vector2(125, 240)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oqa1n"]
+size = Vector2(300, 300)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_moxti"]
-size = Vector2(125, 240)
-
-[node name="Enemigo" type="CharacterBody2D" unique_id=2006028527 groups=["enemigos"]]
-collision_layer = 4
-collision_mask = 3
+[node name="jefe_heptagono" type="CharacterBody2D" unique_id=1648495791]
 script = ExtResource("1_80hcr")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1484610955]
-visible = false
-modulate = Color(1, 0.047058824, 0.03529412, 1)
-texture = SubResource("PlaceholderTexture2D_becj5")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=381486437]
+shape = SubResource("RectangleShape2D_80hcr")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2045548079]
-position = Vector2(0, 0.5)
-shape = SubResource("RectangleShape2D_becj5")
+[node name="Hurtbox" type="Area2D" parent="." unique_id=566117627]
 
-[node name="Hurtbox" type="Area2D" parent="." unique_id=1866639594]
-collision_layer = 2
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Hurtbox" unique_id=345556726]
+shape = SubResource("RectangleShape2D_e6wv3")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1139484791]
-position = Vector2(0, 0.5)
-shape = SubResource("RectangleShape2D_a5tj2")
+[node name="Hitbox" type="Area2D" parent="." unique_id=277098747]
 
-[node name="Hitbox" type="Area2D" parent="." unique_id=346535749 groups=["enemigos"]]
-collision_layer = 0
-collision_mask = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1160862772]
-position = Vector2(0, 1)
-shape = SubResource("RectangleShape2D_moxti")
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Hitbox" unique_id=624494428]
+shape = SubResource("RectangleShape2D_oqa1n")
 
 [connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

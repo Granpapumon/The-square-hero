@@ -50,6 +50,36 @@ var esta_muerto = false
 # --- SISTEMA VISUAL (NUEVO) ---
 var particulas_correr: CPUParticles2D # Nube de polvo continua tipo Sonic
 
+# --- MEMORIA DE HABILIDADES ---
+var habilidad_slot_1 = "" # Aquí guardaremos la del nivel 5 (ej: "fuego")
+var color_slot_1 = Color.WHITE
+
+var habilidad_slot_2 = "" # Aquí guardaremos la del nivel 15 (ej: "hielo")
+var color_slot_2 = Color.WHITE
+
+var habilidad_fusionada = "" # Aquí se guardará el resultado en el nivel 25
+
+# --- DICCIONARIO DE FUSIONES ---
+var diccionario_colores_fusion = {
+	"fuego_hielo": Color(0.6, 0.1, 0.8), # Vapor (Morado)
+	"hielo_fuego": Color(0.6, 0.1, 0.8), # Inverso por si acaso
+	
+	"fuego_rayo": Color(1.0, 0.4, 0.0),  # Aurora (Naranja)
+	"rayo_fuego": Color(1.0, 0.4, 0.0),  
+	
+	"fuego_veneno": Color(0.8, 1.0, 0.0), # Toxina (Verde amarillento)
+	"veneno_fuego": Color(0.8, 1.0, 0.0),
+	
+	"hielo_rayo": Color(0.0, 1.0, 1.0),  # Plasma (Cian brillante)
+	"rayo_hielo": Color(0.0, 1.0, 1.0),
+	
+	"hielo_veneno": Color(0.0, 0.5, 0.5), # Degradación (Verde azulado)
+	"veneno_hielo": Color(0.0, 0.5, 0.5),
+	
+	"rayo_veneno": Color(0.5, 1.0, 0.0),  # Conductor (Verde neón)
+	"veneno_rayo": Color(0.5, 1.0, 0.0)
+}
+
 # --- ESCENAS ---
 @onready var proyectil_escena        = preload("res://proyectil.tscn")
 @onready var proyectil_fuego_escena  = preload("res://proyectil_fuego.tscn")

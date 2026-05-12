@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bqmih5ww3koe6"]
+
+[ext_resource type="Script" uid="uid://btbut1hyvkven" path="res://animacion_fusion.gd" id="1_fumwu"]
+
+[node name="AnimacionFusion" type="Control" unique_id=1592549279]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_fumwu")

@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://cdwp356308kqv"]
+
+[ext_resource type="Script" uid="uid://brahdtdqyunt8" path="res://enemigo_rombo.gd" id="1_ivx5s"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ivx5s"]
+size = Vector2(180, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x2lmo"]
+size = Vector2(180, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rs2nd"]
+size = Vector2(180, 180)
+
+[node name="enemigo_rombo" type="CharacterBody2D" unique_id=532968961]
+script = ExtResource("1_ivx5s")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1271396128]
+shape = SubResource("RectangleShape2D_ivx5s")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1493930158]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1255020430]
+shape = SubResource("RectangleShape2D_x2lmo")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=2120305047]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Hitbox" unique_id=1527313321]
+shape = SubResource("RectangleShape2D_rs2nd")
+
+[node name="TimerDisparo" type="Timer" parent="." unique_id=1744114260]
+
+[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

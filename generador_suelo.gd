@@ -44,6 +44,7 @@ func _generar_chunk(indice: int):
 	var nueva_plataforma = plataforma_escena.instantiate()
 	
 	# La zona de inicio (Chunk 0) siempre es un piso sólido y largo para no morir al aparecer
+	@warning_ignore("incompatible_ternary")
 	var ancho_final = TAMAÑO_CHUNK if indice == 0 else rng.randf_range(ANCHO_MIN, ANCHO_MAX)
 	
 	# IMPORTANTE: Ajusta este '500' a la altura en el eje Y donde quieres tu suelo
