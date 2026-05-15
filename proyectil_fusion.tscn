@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://ol30qv7pbtrl"]
+
+[ext_resource type="Script" uid="uid://cb6dxlquj2dv5" path="res://proyectil_fusion.gd" id="1_rp51k"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rp51k"]
+size = Vector2(60, 60)
+
+[node name="proyectil_fusion" type="Area2D" unique_id=2083479238]
+script = ExtResource("1_rp51k")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=141000034]
+shape = SubResource("RectangleShape2D_rp51k")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

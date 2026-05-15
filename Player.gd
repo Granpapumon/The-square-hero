@@ -1,12 +1,13 @@
 extends CharacterBody2D
 
 # --- ESTADÍSTICAS ---
-var velocidad_actual = 300.0
-var fuerza_salto = -600.0
+var velocidad_actual = 400.0
+var fuerza_salto = -700.0
 var dano_ataque = 1
 var tiempo_disparo = 1.0
 var gravedad = 2000.0
 var salud = 100
+var recibio_dano_toda_la_partida = false
 
 # --- PROGRESIÓN ---
 var nivel = 0
@@ -87,7 +88,9 @@ var diccionario_colores_fusion = {
 @onready var proyectil_rayo_escena   = preload("res://proyectil_rayo.tscn")
 @onready var proyectil_veneno_escena = preload("res://proyectil_veneno.tscn")
 @onready var barra_salud = $ProgressBar # Asegúrate de que la ruta sea correcta
+@onready var proyectil_fusion_escena = preload("res://proyectil_fusion.tscn")
 var salud_maxima = 100
+
 
 func actualizar_salud(nueva_salud):
 	salud = nueva_salud
@@ -152,6 +155,8 @@ func cambiar_expresion(nueva_expresion: String, duracion: float):
 
 # --- VIDA ---
 func recibir_daño(cantidad):
+	recibio_dano_toda_la_partida = true # <--- Añade esto
+	salud -= cantidad
 	if invulnerable or dasheando or esta_muerto: return
 	# --- ACTUALIZACIÓN DE LA BARRA DE VIDA ---
 	var barra_tween = get_tree().create_tween()
@@ -440,11 +445,31 @@ func _obtener_objetivo() -> Node2D:
 	return objetivo
 
 func _disparar(escena: PackedScene, objetivo: Node2D, dano: int):
-	var bala = escena.instantiate()
-	bala.dano = dano
-	get_tree().current_scene.add_child(bala)
-	bala.global_position = global_position
-	bala.lanzar(global_position.direction_to(objetivo.global_position))
+	# Comprobamos si el jugador ya tiene una fusión activa (Nivel 25+)
+	if habilidad_fusionada != "":
+		# --- DISPARO DE FUSIÓN ---
+		var bala = proyectil_fusion_escena.instantiate()
+		get_tree().current_scene.add_child(bala)
+		
+		# Ajusta 'PuntoDisparo' al nodo o posición desde donde salen tus balas normalmente
+		bala.global_position = global_position 
+		
+		# Obtenemos el color que le toca a esta fusión desde tu diccionario
+		var color_bala = diccionario_colores_fusion.get(habilidad_fusionada, Color.WHITE)
+		
+		# Calculamos la dirección (Ajusta esto según cómo apuntes en tu juego)
+		# Ejemplo simple: dispara hacia donde esté mirando el personaje
+		var direccion_disparo = global_position.direction_to(objetivo.global_position)
+		
+		if bala.has_method("lanzar"):
+			bala.lanzar(direccion_disparo, habilidad_fusionada, color_bala)
+			
+	else:
+		var bala = escena.instantiate()
+		bala.dano = dano
+		get_tree().current_scene.add_child(bala)
+		bala.global_position = global_position
+		bala.lanzar(global_position.direction_to(objetivo.global_position))
 
 func _on_weapon_timer_timeout():
 	var objetivo = _obtener_objetivo()

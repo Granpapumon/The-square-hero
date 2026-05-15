@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bcoi5nuf88gdg"]
+
+[ext_resource type="Script" uid="uid://bm2llkrgv2hdc" path="res://jefe_decagono.gd" id="1_v3g14"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_twg0q"]
+size = Vector2(300, 300)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v3g14"]
+size = Vector2(300, 300)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4vu6r"]
+size = Vector2(300, 300)
+
+[node name="jefe_decagono" type="CharacterBody2D" unique_id=286872598]
+script = ExtResource("1_v3g14")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1430710489]
+shape = SubResource("RectangleShape2D_twg0q")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1704030655]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1888071619]
+shape = SubResource("RectangleShape2D_v3g14")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=2037421697]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=165104686]
+shape = SubResource("RectangleShape2D_4vu6r")
+
+[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

@@ -43,5 +43,5 @@ color = Color(0.3647059, 1, 1, 1)
 polygon = PackedVector2Array(-643.4353, 121.59343, -420.3734, -78.12478, -62.43689, 144.93712, -241.40515, 277.21802, -316.62366, 108.62471)
 uv = PackedVector2Array(-643.4353, 121.59343, -420.3734, -78.12478, -62.43689, 144.93712, -241.40515, 277.21802, -316.62366, 108.62471)
 
-[connection signal="area_entered" from="Hitbox" to="." method="_on_Hitbox_area_entered"]
+[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]
 [connection signal="timeout" from="TimerSalto" to="." method="_on_timer_salto_timeout"]

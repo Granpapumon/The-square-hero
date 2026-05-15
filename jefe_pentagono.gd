@@ -61,12 +61,21 @@ func _ready():
 	raycast_vacio.target_position = Vector2(0, 150)
 	add_child(raycast_vacio)
 	
+	# Timer de Disparo
 	var timer_disparo = Timer.new()
 	timer_disparo.name = "TimerDisparo"
 	timer_disparo.wait_time = 2.0
 	timer_disparo.autostart = true
 	timer_disparo.timeout.connect(_on_timer_disparo_timeout)
 	add_child(timer_disparo)
+	
+	# Timer de Salto (Aseguramos que exista para que funcione tu onda de choque)
+	var timer_salto = Timer.new()
+	timer_salto.name = "TimerSalto"
+	timer_salto.wait_time = 3.5
+	timer_salto.autostart = true
+	timer_salto.timeout.connect(_on_timer_salto_timeout)
+	add_child(timer_salto)
 
 func _physics_process(delta):
 	if not is_on_floor():
@@ -94,14 +103,63 @@ func _physics_process(delta):
 		
 	move_and_slide()
 
+# --- ACTUALIZADO: DISPARO CON TELEGRAFIADO Y 5 PUNTAS ---
 func _on_timer_disparo_timeout():
 	if not is_instance_valid(player) or not is_inside_tree(): return
-	var bala = proyectil_escena.instantiate()
-	bala.dano = 10 
-	get_tree().current_scene.add_child(bala)
-	bala.global_position = global_position
-	if bala.has_method("lanzar"):
-		bala.lanzar(global_position.direction_to(player.global_position))
+	
+	# 1. AVISO VISUAL (Telegrafiado)
+	var color_original = modulate
+	var tween = create_tween()
+	tween.tween_property(self, "modulate", Color(2.0, 1.5, 0.0), 0.3) # Brilla naranja
+	
+	# Temblor para dar feedback de peligro
+	var pos_original = position
+	for i in range(4):
+		position.x = pos_original.x + randf_range(-4, 4)
+		await get_tree().create_timer(0.1).timeout
+		if not is_inside_tree(): return
+	position = pos_original
+	self.modulate = color_original
+	
+	# 2. ATAQUE (5 Direcciones tipo Pentágono)
+	var cantidad_balas = 5
+	var angulo_base = TAU / cantidad_balas
+	
+	for i in range(cantidad_balas):
+		var bala = proyectil_escena.instantiate()
+		bala.dano = 10 
+		get_tree().current_scene.add_child(bala)
+		bala.global_position = global_position
+		
+		if bala.has_method("lanzar"):
+			# Dispara en forma de estrella apuntando hacia el jugador
+			var direccion_base = global_position.direction_to(player.global_position)
+			var direccion_bala = direccion_base.rotated(i * angulo_base)
+			bala.lanzar(direccion_bala)
+
+# --- ACTUALIZADO: SALTO CON TELEGRAFIADO SQUASH ---
+func _on_timer_salto_timeout():
+	if not is_inside_tree() or not is_on_floor(): return
+	saltando = true
+	
+	# 1. AVISO VISUAL (Se aplasta tomando impulso)
+	var tween = create_tween()
+	tween.tween_property(self, "scale", Vector2(1.3, 0.6), 0.3)
+	await tween.finished
+	if not is_inside_tree(): return
+	scale = Vector2.ONE # Recupera su forma al saltar
+	
+	# 2. ACCIÓN (Onda de choque y salto)
+	if en_furia:
+		var onda = escena_onda.instantiate()
+		get_parent().add_child(onda)
+		onda.global_position = global_position
+	
+	var direccion_azar = Vector2(randf_range(-1, 1), -1).normalized()
+	velocity = direccion_azar * (velocidad * 4)
+	await get_tree().create_timer(0.4).timeout
+	if not is_inside_tree(): return
+	saltando = false
 
 func recibir_daño(cantidad):
 	if randf() <= 0.30:
@@ -123,23 +181,9 @@ func recibir_daño(cantidad):
 	
 	if salud <= 0:
 		var mundo = get_tree().get_first_node_in_group("mundo")
-		if mundo: mundo.jefe_derrotado()
+		if mundo and mundo.has_method("jefe_derrotado"): 
+			mundo.jefe_derrotado()
 		queue_free()
-
-func _on_timer_salto_timeout():
-	saltando = true
-	
-	# --- GENERAR ONDA DE CHOQUE EN FASE 2 ---
-	if en_furia:
-		var onda = escena_onda.instantiate()
-		get_parent().add_child(onda)
-		onda.global_position = global_position
-	
-	var direccion_azar = Vector2(randf_range(-1, 1), -1).normalized()
-	velocity = direccion_azar * (velocidad * 4)
-	await get_tree().create_timer(0.4).timeout
-	if not is_inside_tree(): return
-	saltando = false
 
 func _on_hitbox_area_entered(area):
 	if area.name == "Hurtbox":

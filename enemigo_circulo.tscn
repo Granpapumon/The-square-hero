@@ -28,5 +28,6 @@ shape = SubResource("RectangleShape2D_718rk")
 shape = SubResource("RectangleShape2D_xduwa")
 
 [node name="TimerDisparo" type="Timer" parent="." unique_id=468111462]
+autostart = true
 
 [connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

@@ -167,6 +167,11 @@ func _ready():
 	add_child(raycast_vacio)
 
 func _physics_process(delta):
+	# 1. Si está detenido por la fusión (Vapor, Plasma, Degradación)
+	if esta_detenido:
+		velocity = Vector2.ZERO
+		move_and_slide() # Mantiene la colisión para que no lo empujen raro
+		return # Corta la función aquí. Godot ya no leerá el código de abajo.
 	if congelado: return
 	if not is_on_floor(): 
 		velocity.y += gravedad * delta
@@ -295,3 +300,31 @@ func _draw():
 				"E": color = color_base
 				"M": color = color_sombra
 			draw_rect(Rect2(offset_x + (x * pixel_size), offset_y + (y * pixel_size), pixel_size, pixel_size), color)
+
+var velocidad_actual = 100.0
+var esta_detenido = false
+
+func aplicar_estado(tipo, duracion, valor = 0):
+	match tipo:
+		"detener":
+			esta_detenido = true
+			await get_tree().create_timer(duracion).timeout
+			esta_detenido = false
+			
+		"ralentizar":
+			var vel_original = velocidad_actual
+			velocidad_actual *= valor # valor = 0.5 según tu tabla
+			await get_tree().create_timer(duracion).timeout
+			velocidad_actual = vel_original
+			
+		"envenenar":
+			_bucle_veneno(duracion, valor)
+
+func _bucle_veneno(tiempo, dano):
+	for i in range(int(tiempo)):
+		if not is_instance_valid(self): break
+		recibir_daño(dano)
+		# Feedback visual de veneno
+		modulate = Color(0, 1, 0) 
+		await get_tree().create_timer(1.0).timeout
+		modulate = Color(1, 1, 1)

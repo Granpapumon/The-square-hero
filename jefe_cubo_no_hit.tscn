@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://c28p7htejwww8"]
+
+[ext_resource type="Script" uid="uid://dx0u2s7yffe0i" path="res://jefe_cubo_no_hit.gd" id="1_rk1oy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_18eit"]
+size = Vector2(300, 300)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hvyyl"]
+size = Vector2(300, 300)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hlnmi"]
+size = Vector2(300, 300)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_hvyyl"]
+viewport_path = NodePath("SubViewport")
+
+[node name="jefe_cubo" type="CharacterBody2D" unique_id=207473073]
+script = ExtResource("1_rk1oy")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1012051668]
+shape = SubResource("RectangleShape2D_18eit")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1397727563]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=269801603]
+shape = SubResource("RectangleShape2D_hvyyl")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=59225008]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1543917724]
+shape = SubResource("RectangleShape2D_hlnmi")
+
+[node name="SubViewport" type="SubViewport" parent="." unique_id=433515763]
+
+[node name="Camera2D" type="Camera2D" parent="SubViewport" unique_id=1154817821]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="SubViewport" unique_id=1405033768]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewport" unique_id=1521089561]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=418467521]
+texture = SubResource("ViewportTexture_hvyyl")
+
+[connection signal="area_entered" from="Hitbox" to="." method="_on_hitbox_area_entered"]

@@ -14,9 +14,10 @@ extends Node2D
 @onready var escena_trapecio       = preload("res://enemigo_trapecio.tscn")
 @onready var escena_jefe_heptagono = preload("res://jefe_heptagono.tscn")
 @onready var escena_circulo        = preload("res://enemigo_circulo.tscn")
-
-
-
+@onready var escena_jefe_decagono  = preload("res://jefe_decagono.tscn")
+@onready var escena_jefe_cubo      = preload("res://jefe_cubo.tscn")
+@onready var escena_jefe_cubo_no_hit    = preload("res://jefe_cubo_no_hit.tscn")
+@onready var escena_jefe_cubo_verdadero = preload("res://jefe_cubo_verdadero.tscn")
 
 const MAX_ENEMIGOS = 25
 var jefe_activo = false
@@ -50,6 +51,8 @@ func _on_spawner_timeout() -> void:
 			spawnear_jefe_2()
 		elif player.nivel == 25:
 			iniciar_evento_fusion() # Dispara la fusión de habilidades
+		elif player.nivel == 30: # NUEVO JEFE
+			spawnear_jefe_3()
 
 	# --- CONTROL DE ÉLITES POR TRAMOS ---
 	var niveles_estrella = [4, 6]
@@ -108,9 +111,15 @@ func spawner_jefe_pentagono():
 
 func jefe_derrotado():
 	jefe_activo = false
-	var hud = get_tree().get_first_node_in_group("HUD")
-	if hud:
-		hud.mostrar_mensaje("¡JEFE DERROTADO!")
+	if player.nivel == 30:
+		# Detenemos todo para la aparición del jefe final
+		jefe_activo = true
+		var hud = get_tree().get_first_node_in_group("HUD")
+		if hud: hud.mostrar_mensaje("C A R G A N D O   A N O M A L Í A   3 D . . .")
+		
+		# Esperamos 3 segundos de suspenso antes de spawnearlo
+		await get_tree().create_timer(3.0).timeout
+		spawnear_jefe_final()
 
 func spawnear_jefe_2():
 	jefe_activo = true
@@ -186,3 +195,46 @@ func iniciar_evento_fusion():
 			hud.add_child(animacion)
 		else:
 			add_child(animacion)
+func spawnear_jefe_3():
+	jefe_activo = true
+	var jefe = escena_jefe_decagono.instantiate()
+	
+	# Lo posicionamos un poco más lejos para que el jugador tenga tiempo de reaccionar
+	jefe.global_position = player.global_position + Vector2(700, -200)
+	add_child(jefe)
+	
+	var hud = get_tree().get_first_node_in_group("HUD")
+	if hud:
+		hud.mostrar_mensaje("🛑 ¡JEFE DECÁGONO DETECTADO! 🛑")
+
+func spawnear_jefe_final():
+	var jefe = escena_jefe_cubo.instantiate()
+	jefe.global_position = player.global_position + Vector2(600, -100)
+	add_child(jefe)
+
+var jefe_no_hit_desbloqueado = false
+
+func desbloquear_jefe_no_hit():
+	var hud = get_tree().get_first_node_in_group("HUD")
+	if hud: hud.mostrar_mensaje("⚠ ANOMALÍA SUPERIOR DETECTADA ⚠")
+	
+	# Spawnear el Cubo No-Hit después de un breve momento
+	await get_tree().create_timer(2.0).timeout
+	var jefe = escena_jefe_cubo_no_hit.instantiate()
+	jefe.global_position = player.global_position + Vector2(600, -100)
+	add_child(jefe)
+
+func evaluar_cubo_verdadero():
+	# Esta función la llamará el Cubo No-Hit al morir
+	if not player.recibio_dano_toda_la_partida:
+		var hud = get_tree().get_first_node_in_group("HUD")
+		if hud: hud.mostrar_mensaje("👁 EL VERDADERO DIOS DE LA FORMA DESPIERTA 👁")
+		
+		await get_tree().create_timer(3.0).timeout
+		var jefe = escena_jefe_cubo_verdadero.instantiate()
+		jefe.global_position = player.global_position + Vector2(0, -300) # Aparece desde arriba
+		add_child(jefe)
+	else:
+		# Si recibió daño en algún nivel anterior, el juego simplemente termina aquí
+		var hud = get_tree().get_first_node_in_group("HUD")
+		if hud: hud.mostrar_mensaje("J U E G O   T E R M I N A D O")
