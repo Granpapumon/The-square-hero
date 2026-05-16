@@ -136,23 +136,86 @@ func _process(_delta):
 	queue_redraw()
 
 func _draw():
+	# Fijamos la semilla para que los adornos aleatorios no "parpadeen" en cada frame
+	seed(12345) 
+	
 	var ancho_total = 3200.0
-	var alto_total = 200.0
+	var alto_total = 120.0 # Más delgado para parecer plataforma flotante
 	var offset_x = -ancho_total / 2.0
 	var y_suelo = 16.0
-	draw_rect(Rect2(offset_x - 4, y_suelo - 4, ancho_total + 8, alto_total + 8), Color.BLACK)
-	draw_rect(Rect2(offset_x, y_suelo, ancho_total, alto_total), Color(0.12, 0.1, 0.15))
-	var tile_size = 64.0
-	for x in range(int(offset_x), int(offset_x + ancho_total), int(tile_size)):
-		if int(floor(float(x) / tile_size)) % 3 == 0:
-			draw_circle(Vector2(x + 32, y_suelo + 60), 10, Color(0.2, 0.18, 0.25))
-			draw_circle(Vector2(x + 10, y_suelo + 120), 15, Color(0.18, 0.15, 0.22))
-	var pixel_hierba = 16.0
-	for x in range(int(offset_x), int(offset_x + ancho_total), int(pixel_hierba)):
-		var altura_h = 24.0 if int(floor(float(x) / pixel_hierba)) % 2 == 0 else 16.00
-		draw_rect(Rect2(x, y_suelo, pixel_hierba, altura_h + 4), Color(0.05, 0.3, 0.1))
-		draw_rect(Rect2(x, y_suelo, pixel_hierba, altura_h), Color(0.1, 0.7, 0.2))
-		draw_rect(Rect2(x, y_suelo, pixel_hierba, 6), Color(0.4, 0.9, 0.3))
+	
+	# --- PALETA DE COLORES JAPONESA / PIXEL ART ---
+	var color_piedra_base = Color(0.65, 0.68, 0.70) # Gris piedra claro
+	var color_piedra_sombra = Color(0.48, 0.52, 0.55) # Gris oscuro para profundidad
+	var color_borde = Color(0.25, 0.28, 0.30) # Contorno inferior muy oscuro
+	var color_musgo_base = Color(0.20, 0.60, 0.30) # Verde intenso del musgo
+	var color_musgo_brillo = Color(0.45, 0.85, 0.45) # Brillo superior del pasto
+	var color_hiedra = Color(0.15, 0.45, 0.25) # Enredaderas colgantes oscuras
+	var color_cerezo = Color(1.0, 0.65, 0.80) # Rosa de los pétalos caídos
+	
+	# 1. Borde oscuro que envuelve toda la plataforma flotante
+	draw_rect(Rect2(offset_x - 4, y_suelo - 4, ancho_total + 8, alto_total + 8), color_borde)
+	
+	# 2. Base sólida de la plataforma de piedra
+	draw_rect(Rect2(offset_x, y_suelo, ancho_total, alto_total), color_piedra_base)
+	
+	# 3. Ladrillos de piedra labrada (Efecto muro de templo)
+	var tile_w = 48.0
+	var tile_h = 24.0
+	for y in range(int(y_suelo), int(y_suelo + alto_total), int(tile_h)):
+		for x in range(int(offset_x), int(offset_x + ancho_total), int(tile_w)):
+			var desfase = (tile_w / 2.0) if int((y - y_suelo) / tile_h) % 2 != 0 else 0.0
+			var px = x + desfase
+			if px < offset_x + ancho_total:
+				# Contorno del bloque
+				draw_rect(Rect2(px, y, tile_w, tile_h), color_piedra_sombra, false, 2.0)
+				# Sombra interior (efecto de profundidad en 3D)
+				draw_rect(Rect2(px + 2, y + tile_h - 6, tile_w - 4, 6), color_piedra_sombra)
+
+	# 4. Hiedra colgando por debajo de la plataforma
+	var ancho_hiedra = 12.0
+	for x in range(int(offset_x), int(offset_x + ancho_total), int(ancho_hiedra)):
+		if randf() > 0.4: # 60% de probabilidad de generar hiedra aquí
+			var largo_hiedra = randf_range(20.0, 80.0)
+			draw_rect(Rect2(x, y_suelo + alto_total, 6.0, largo_hiedra), color_hiedra)
+			draw_rect(Rect2(x + 2, y_suelo + alto_total, 2.0, largo_hiedra - 10.0), color_musgo_base)
+
+	# 5. Musgo y césped en la superficie (donde pisan los personajes)
+	var ancho_musgo = 16.0
+	for x in range(int(offset_x), int(offset_x + ancho_total), int(ancho_musgo)):
+		# Variación de altura para que se vea irregular y orgánico
+		var alto_musgo = 20.0 if int(floor(float(x) / ancho_musgo)) % 3 == 0 else 12.0
+		# Caída del musgo sobre la piedra
+		draw_rect(Rect2(x, y_suelo - 2, ancho_musgo, alto_musgo), color_musgo_base)
+		# Borde superior brillante
+		draw_rect(Rect2(x, y_suelo - 4, ancho_musgo, 6), color_musgo_brillo)
+		
+		# 6. Flores de Cerezo (Pétalos esparcidos en el suelo)
+		if randf() > 0.65:
+			draw_rect(Rect2(x + randf_range(2, 10), y_suelo + randf_range(-2, 6), 4, 4), color_cerezo)
+			if randf() > 0.5: # Ocasionalmente dibuja pares de pétalos
+				draw_rect(Rect2(x + randf_range(2, 10), y_suelo + randf_range(-2, 6), 4, 4), color_cerezo)
+
+	# 7. Linternas Japonesas de Piedra (Tōrō) en el fondo
+	var separacion_linternas = 350.0 # Posiciona una linterna cada 350 píxeles
+	for x in range(int(offset_x + 100), int(offset_x + ancho_total), int(separacion_linternas)):
+		var bx = x
+		var by = y_suelo - 4 # Apoyadas sobre la capa de musgo
+		var luz_linterna = Color(1.0, 0.9, 0.4) # Luz cálida
+		
+		# Base y pedestal
+		draw_rect(Rect2(bx - 12, by - 10, 24, 10), color_piedra_sombra)
+		draw_rect(Rect2(bx - 6, by - 30, 12, 20), color_piedra_base)
+		draw_rect(Rect2(bx - 16, by - 38, 32, 8), color_piedra_sombra)
+		
+		# Caja de luz y la llama
+		draw_rect(Rect2(bx - 10, by - 58, 20, 20), color_piedra_base)
+		draw_rect(Rect2(bx - 6, by - 54, 12, 12), luz_linterna) 
+		
+		# Techo tradicional curvo de templo
+		draw_rect(Rect2(bx - 24, by - 66, 48, 8), color_piedra_sombra)
+		draw_rect(Rect2(bx - 18, by - 74, 36, 8), color_piedra_sombra)
+		draw_rect(Rect2(bx - 4, by - 82, 8, 8), color_piedra_base)
 
 func iniciar_evento_fusion():
 	# 1. Pausamos el mundo y activamos el estado de jefe (detiene spawns)

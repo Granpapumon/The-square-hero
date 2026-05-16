@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://cld022tfitfbs" path="res://pantalla_perks.tscn" id="7_2hh7m"]
 [ext_resource type="Script" uid="uid://4h10iujplfk6" path="res://generador_suelo.gd" id="8_t8jxu"]
 [ext_resource type="Script" uid="uid://dqp41yhcqv6ng" path="res://plataforma_base.gd" id="9_pfhxm"]
+[ext_resource type="Script" uid="uid://cekdi7ygeekdd" path="res://fondo_japon.gd" id="10_pij3u"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_otwa2"]
 size = Vector2(3200, 133)
@@ -68,5 +69,11 @@ offset_bottom = 23.0
 [node name="GeneradorSuelo" type="Node2D" parent="." unique_id=2133439674]
 script = ExtResource("8_t8jxu")
 plataforma_escena = SubResource("PackedScene_pij3u")
+
+[node name="FondoJapon" type="CanvasLayer" parent="." unique_id=23143203]
+layer = -10
+
+[node name="Node2D" type="Node2D" parent="FondoJapon" unique_id=875517449]
+script = ExtResource("10_pij3u")
 
 [connection signal="timeout" from="Spawner" to="." method="_on_spawner_timeout"]

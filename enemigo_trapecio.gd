@@ -1,14 +1,36 @@
-@tool
 extends CharacterBody2D
 
-@export var salud = 250
-@export var velocidad = 90.0 # Es más lento, pero más resistente
+# --- ESTADÍSTICAS REBALANCEADAS (ÉLITE: TRAPECIO) ---
+@export var velocidad = 90.0 # Lento y blindado
+var velocidad_base: float
+var velocidad_actual: float
+@export var salud = 22 # Rebalanceado de 250 a 22 para escala No-Hit
 @export var dano_contacto = 20
+@export var probabilidad_gema: float = 1.0
+@export var xp_que_da: int = 9 # Un botín pesado
+
+# --- SISTEMA DE ESTADOS Y CONTROL ---
+var raycast_vacio: RayCast2D
+var saltando_vacio = false
+var fuerza_salto = -750.0 
+
+var congelado = false
+var envenenado = false
+var esta_detenido = false
+var puede_hacer_daño = true
+var cargando_ataque = false
 
 var gravedad = ProjectSettings.get_setting("physics/2d/default_gravity")
 var player = null
 
+# --- NODOS ---
+@onready var gema_escena = preload("res://gema_xp.tscn")
+@onready var dano_flotante_escena = preload("res://dano_flotante.tscn")
 @onready var proyectil_escena = preload("res://proyectil_enemigo.tscn")
+
+# --- ARTE Y COLOR ---
+var color_base = Color(0.8, 0.4, 0.1) # Naranja quemado/óxido
+var color_sombra = Color(0.4, 0.2, 0.05)
 
 var pixel_art = [
 	".......BBBB.......",
@@ -23,63 +45,214 @@ var pixel_art = [
 
 func _ready():
 	player = get_tree().get_first_node_in_group("player")
-	add_to_group("elites")
 	
-	# Usamos el Timer que creaste manualmente
-	if has_node("TimerDisparo"):
-		$TimerDisparo.wait_time = 3.0
-		$TimerDisparo.autostart = true
-		if not $TimerDisparo.timeout.is_connected(_on_timer_disparo_timeout):
-			$TimerDisparo.timeout.connect(_on_timer_disparo_timeout)
-		$TimerDisparo.start()
+	# Grupos de colisión y clasificación
+	add_to_group("elites")
+	add_to_group("enemigo") 
+	
+	velocidad_base = velocidad
+	velocidad_actual = velocidad
+	
+	# Timers automáticos
+	var timer_dano = Timer.new()
+	timer_dano.name = "TimerDaño"
+	timer_dano.wait_time = 1.0
+	timer_dano.one_shot = true
+	timer_dano.timeout.connect(_on_timer_daño_timeout)
+	add_child(timer_dano)
+	
+	var timer_atk = Timer.new()
+	timer_atk.name = "TimerDisparo"
+	timer_atk.wait_time = 3.0
+	timer_atk.autostart = true
+	timer_atk.timeout.connect(_on_timer_ataque_timeout)
+	add_child(timer_atk)
+	
+	# Sensor de abismos
+	raycast_vacio = RayCast2D.new()
+	raycast_vacio.target_position = Vector2(0, 150)
+	add_child(raycast_vacio)
+	
+	# Conexión del Hurtbox segura
+	if has_node("Hurtbox"):
+		if not $Hurtbox.area_entered.is_connected(_on_hurtbox_area_entered):
+			$Hurtbox.area_entered.connect(_on_hurtbox_area_entered)
 
 func _physics_process(delta):
-	# Evitamos que se mueva dentro del editor
 	if Engine.is_editor_hint(): return 
 	
-	# Aplicamos gravedad (por eso aquí sí usamos delta sin guion bajo)
-	if not is_on_floor():
+	if esta_detenido or congelado or cargando_ataque:
+		if not is_on_floor(): velocity.y += gravedad * delta
+		velocity.x = 0
+		move_and_slide()
+		return
+		
+	if not is_on_floor(): 
 		velocity.y += gravedad * delta
-
+	else:
+		saltando_vacio = false
+		
 	if is_instance_valid(player):
 		var direccion = global_position.direction_to(player.global_position)
-		velocity.x = velocidad if direccion.x > 0 else -velocidad
+		
+		if saltando_vacio:
+			velocity.x = (velocidad_actual * 2.5) * (1 if direccion.x > 0 else -1)
+		else:
+			velocity.x = velocidad_actual * sign(direccion.x)
+		
+		if is_on_floor() and velocity.x != 0:
+			raycast_vacio.position = Vector2(sign(velocity.x) * 90, 0)
+			raycast_vacio.force_raycast_update()
+			
+			if not raycast_vacio.is_colliding() and player.global_position.y <= global_position.y + 150:
+				velocity.y = fuerza_salto
+				saltando_vacio = true
 	else:
-		velocity.x = move_toward(velocity.x, 0, velocidad)
-
+		velocity.x = move_toward(velocity.x, 0, velocidad_actual)
+		
 	move_and_slide()
-
-func _on_timer_disparo_timeout():
-	# Evitamos que dispare en el editor
-	if Engine.is_editor_hint() or not is_instance_valid(player) or not is_inside_tree(): return
 	
-	# Ráfaga de 5 disparos rápidos en línea recta
+	# Polling seguro de Hitbox
+	if puede_hacer_daño and has_node("Hitbox"):
+		for area in $Hitbox.get_overlapping_areas():
+			if area.name == "Hurtbox" and area.get_parent().has_method("recibir_daño"):
+				area.get_parent().recibir_daño(dano_contacto)
+				puede_hacer_daño = false
+				$TimerDaño.start()
+				break
+
+# --- INTELIGENCIA ARTIFICIAL: ATAQUE AMETRALLADORA ---
+func _on_timer_ataque_timeout():
+	if Engine.is_editor_hint() or not is_inside_tree() or not is_instance_valid(player) or esta_detenido or congelado: return
+	
+	cargando_ataque = true
+	var color_previo = modulate
+	var tween = create_tween()
+	
+	# AVISO (0.4s): Se achata preparándose para el retroceso y brilla súper naranja
+	tween.tween_property(self, "scale", Vector2(1.2, 0.8), 0.2).set_trans(Tween.TRANS_SINE)
+	tween.parallel().tween_property(self, "modulate", Color(3.0, 1.5, 0.5), 0.4)
+	tween.tween_property(self, "scale", Vector2(0.9, 1.1), 0.2).set_trans(Tween.TRANS_SINE)
+	
+	await tween.finished
+	if not is_inside_tree(): return
+	
+	# ATAQUE: Ráfaga de 5 tiros seguidos apuntando directamente
 	for i in range(5):
+		if not is_inside_tree() or not is_instance_valid(player) or esta_detenido: break
+		
 		var bala = proyectil_escena.instantiate()
 		bala.dano = 12
+		bala.velocidad = 400.0 # Ráfaga rápida
 		get_tree().current_scene.add_child(bala)
 		bala.global_position = global_position
 		
 		if bala.has_method("lanzar"):
 			bala.lanzar(global_position.direction_to(player.global_position))
 			
-		# Pequeña pausa entre cada bala de la ráfaga
+		# Micro-retroceso visual del trapecio al disparar
+		var t_retroceso = create_tween()
+		t_retroceso.tween_property(self, "scale", Vector2(0.8, 1.2), 0.05)
+		t_retroceso.tween_property(self, "scale", Vector2.ONE, 0.05)
+			
+		# Espera entre cada bala
 		await get_tree().create_timer(0.15).timeout
+	
+	# RECUPERACIÓN
+	modulate = color_previo
+	scale = Vector2.ONE
+	cargando_ataque = false
+
+# --- DAÑO Y ESTADOS ---
+func _on_timer_daño_timeout():
+	puede_hacer_daño = true
+
+func _on_hurtbox_area_entered(area):
+	if area.is_in_group("bala_jugador") or "bala" in area.name.to_lower():
+		if "dano" in area:
+			recibir_daño(area.dano)
+		elif area.has_method("get_dano"):
+			recibir_daño(area.get_dano())
+
+func recibir_dano(cantidad):
+	recibir_daño(cantidad)
 
 func recibir_daño(cantidad):
 	salud -= cantidad
+	
+	modulate = Color(5, 5, 5) 
+	scale = Vector2(0.8, 1.2) 
+	
+	var tween = get_tree().create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(self, "modulate", Color(1, 1, 1), 0.15) 
+	tween.tween_property(self, "scale", Vector2(1, 1), 0.2).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	
+	if is_instance_valid(dano_flotante_escena):
+		var flotante = dano_flotante_escena.instantiate()
+		get_parent().call_deferred("add_child", flotante)
+		flotante.global_position = global_position + Vector2(0, -20)
+		if flotante.has_method("iniciar"): flotante.iniciar(cantidad)
+	
 	if salud <= 0:
+		if ClassDB.class_exists("EfectoExplosion") or ResourceLoader.exists("res://efecto_explosion.gd"):
+			var explosion = EfectoExplosion.new()
+			explosion.iniciar("trapecio", color_base) 
+			explosion.global_position = global_position
+			get_parent().add_child(explosion)
+		
+		if randf() <= probabilidad_gema:
+			var gema = gema_escena.instantiate()
+			gema.valor_xp = xp_que_da
+			get_parent().call_deferred("add_child", gema)
+			gema.global_position = global_position + Vector2(0, 20)
+			
 		queue_free()
 
-func _on_hitbox_area_entered(area):
-	if area.name == "Hurtbox":
-		var victima = area.get_parent()
-		if victima.is_in_group("player"):
-			if victima.has_method("recibir_dano"):
-				victima.recibir_dano(dano_contacto)
-			elif victima.has_method("recibir_daño"):
-				victima.recibir_daño(dano_contacto)
+func congelar(tiempo: float):
+	if congelado: return
+	congelado = true
+	modulate = Color(0, 1, 1)
+	await get_tree().create_timer(tiempo).timeout
+	if not is_inside_tree(): return
+	congelado = false
+	modulate = Color(1, 1, 1)
 
+func ralentizar(porcentaje: float, tiempo: float):
+	if congelado: return
+	modulate = Color(1, 1, 0)
+	velocidad_actual = velocidad_base * (1.0 - porcentaje)
+	await get_tree().create_timer(tiempo).timeout
+	if not is_inside_tree(): return
+	velocidad_actual = velocidad_base
+	if not congelado and not envenenado: modulate = Color(1, 1, 1)
+
+func envenenar(dano_por_tick: int):
+	if envenenado: return
+	envenenado = true
+	_bucle_veneno(3.0, dano_por_tick)
+
+func aplicar_estado(tipo, duracion, valor = 0):
+	match tipo:
+		"detener":
+			esta_detenido = true
+			await get_tree().create_timer(duracion).timeout
+			esta_detenido = false
+		"ralentizar":
+			ralentizar(valor, duracion)
+		"envenenar":
+			_bucle_veneno(duracion, valor)
+
+func _bucle_veneno(tiempo, dano):
+	for i in range(int(tiempo)):
+		if not is_instance_valid(self): break
+		recibir_daño(dano)
+		modulate = Color(0, 1, 0) 
+		await get_tree().create_timer(1.0).timeout
+		modulate = Color(1, 1, 1)
+	envenenado = false
+
+# --- DIBUJO ---
 func _process(_delta):
 	queue_redraw()
 
@@ -98,6 +271,6 @@ func _draw():
 			var color = Color.TRANSPARENT
 			match letra:
 				"B": color = Color.BLACK
-				"C": color = Color(0.8, 0.4, 0.1) # Naranja quemado/óxido
-				"M": color = Color(0.4, 0.2, 0.05)
+				"C": color = color_base
+				"M": color = color_sombra
 			draw_rect(Rect2(offset_x + (x * pixel_size), offset_y + (y * pixel_size), pixel_size, pixel_size), color)
